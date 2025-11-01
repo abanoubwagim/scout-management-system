@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scout Manager - Live Attendance Records with QR Codes">
+    <title>Scout Manager - QR Attendance</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="assets/img/sc-ch.webp">
+    <!-- Icons & Fonts -->
+    <link href="assets/icons/material-symbols.css" rel="stylesheet" />
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/attendance-qr.css">
+</head>
+
+<body>
+    <!-- Connection Status Badge -->
+    <div id="connectionStatus" class="connection-status offline">
+        <span class="status-dot"></span>
+        <span id="statusText">Connecting...</span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <aside class="sidebar bg-light p-3 d-flex flex-column shadow" style="width: 250px;" role="navigation">
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="rounded-circle overflow-hidden me-3"
+                    style="width:50px; height:50px; background-image:url('assets/img/lg.webp'); background-size:cover;"
+                    role="img" aria-label="Scout Manager Logo">
+                </div>
+                <h1 class="h5 mb-0" id="displayFullName"></h1>
+            </div>
+
+            <nav class="flex-column nav nav-pills">
+                <a href="dashboard.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="members.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">groups</span>
+                    <span>Members</span>
+                </a>
+                <a href="attendance.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">check_circle</span>
+                    <span>Attendance</span>
+                </a>
+                <a href="activities.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">event</span>
+                    <span>Activities</span>
+                </a>
+                <a href="taxes.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">attach_money</span>
+                    <span>Taxes</span>
+                </a>
+                <a href="attendance-qr.html" class="nav-link d-flex align-items-center mb-2 active" aria-current="page">
+                    <span class="material-symbols-outlined me-2">qr_code_2</span>
+                    <span>QR Attendance</span>
+                </a>
+                <a href="whatsapp.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">chat</span>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="signIn.html" id="signOutBtn" class="nav-link d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2">logout</span>
+                    <span id="signOutText">Sign Out</span>
+                    <span id="signOutSpinner" class="spinner-border spinner-border-sm ms-2" role="status"
+                        style="display:none;"></span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-fill p-4" role="main">
+            <div class="main-container">
+                <!-- Header -->
+                <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <h2 class="h2 mb-0">
+                        <span class="material-symbols-outlined align-middle me-2">qr_code_scanner</span>
+                        Live Attendance Records
+                    </h2>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <div class="date-time-display">
+                            <span class="material-symbols-outlined me-1">calendar_today</span>
+                            <span id="currentDate" class="text-secondary fw-semibold"></span>
+                        </div>
+                        <div class="date-time-display">
+                            <span class="material-symbols-outlined me-1">schedule</span>
+                            <span id="currentTime" class="text-secondary fw-semibold"></span>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card-mini">
+                        <div class="stat-icon bg-success-subtle">
+                            <span class="material-symbols-outlined text-success">check_circle</span>
+                        </div>
+                        <h6>Today's Check-ins</h6>
+                        <div class="stat-value text-success" id="todayCount">0</div>
+                    </div>
+                    <div class="stat-card-mini">
+                        <div class="stat-icon bg-primary-subtle">
+                            <span class="material-symbols-outlined text-primary">schedule</span>
+                        </div>
+                        <h6>Last Check-in</h6>
+                        <div class="stat-value text-primary" id="lastCheckin" style="font-size: 1rem;">--:--:--</div>
+                    </div>
+                    <div class="stat-card-mini">
+                        <div class="stat-icon bg-warning-subtle">
+                            <span class="material-symbols-outlined text-warning">qr_code_2</span>
+                        </div>
+                        <h6>QR Scans</h6>
+                        <div class="stat-value text-warning" id="qrScans">0</div>
+                    </div>
+                </div>
+
+                <!-- Main Content Card -->
+                <section class="bg-white p-4 rounded shadow-sm border">
+                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                        <button id="showQrBtn" class="btn btn-primary btn-lg d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined">qr_code_2</span>
+                            <span>Show QR Codes</span>
+                        </button>
+                        <button id="exportPdfBtn" class="btn btn-outline-primary d-flex align-items-center gap-2"
+                            aria-label="Export attendance as PDF">
+                            <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                            <span>Export as PDF</span>
+                        </button>
+                        <button id="refreshBtn" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined">refresh</span>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="table table-hover align-middle" id="recordsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope="col">Code</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Time</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div id="noRecordsMessage" class="text-center py-5 d-none">
+                        <span class="material-symbols-outlined text-muted mb-3" style="font-size: 64px; opacity: 0.3;">
+                            event_busy
+                        </span>
+                        <p class="text-muted">No attendance records yet</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- QR Overlay -->
+    <div id="qrOverlay" role="dialog" aria-modal="true">
+        <div class="qr-content">
+            <span id="closeQrOverlay" role="button" tabindex="0">×</span>
+            <h3 class="visually-hidden">QR Codes</h3>
+
+            <div class="qr-item">
+                <h5>
+                    <span class="material-symbols-outlined">wifi</span>
+                    WiFi Access
+                </h5>
+                <div class="qr-info">
+                    <div>
+                        <strong>SSID:</strong>
+                        <span id="wifiSsid">Kashafa_ElAgayebi</span>
+                    </div>
+                    <div>
+                        <strong>Password:</strong>
+                        <span id="wifiPass">KashafaElAgayebi!Scouts#</span>
+                    </div>
+                    <div>
+                        <strong>Security:</strong>
+                        <span>WPA/WPA2</span>
+                    </div>
+                </div>
+                <div class="qr-code-wrapper" id="qrCodeContainer1"></div>
+            </div>
+
+            <div class="qr-item">
+                <h5>
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Check-In Portal
+                </h5>
+                <div class="qr-info">
+                    <div>
+                        <strong>Type:</strong>
+                        <span>Attendance</span>
+                    </div>
+                    <div>
+                        <strong>Status:</strong>
+                        <span style="color: #48bb78;">● Active</span>
+                    </div>
+                    <div>
+                        <strong>URL:</strong>
+                        <!-- change  page -->
+                        <span style="color: #48bb78;">192.168.137.1:9090/qr-checkin.html</span>
+                    </div>
+                </div>
+                <div class="qr-code-wrapper" id="qrCodeContainer2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/qrcode.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/jspdf.umd.min.js"></script>
+    <script src="assets/js/jspdf.plugin.autotable.min.js"></script>
+    <script src="assets/js/attendance-qr.js"></script>
+
+</body>
+
+</html>

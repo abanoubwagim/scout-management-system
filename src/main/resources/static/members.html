@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scout Manager - Members Management System">
+    <title>Scout Manager - Members</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="assets/img/sc-ch.webp">
+    <!-- Icons & Fonts -->
+    <link href="assets/icons/material-symbols.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/icons/bootstrap-icons-1.13.1/bootstrap-icons.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/members.css">
+</head>
+
+<body>
+    <div class="d-flex">
+
+        <!-- Sidebar -->
+        <aside class="sidebar bg-light p-3 d-flex flex-column shadow" style="width: 250px;">
+            <!-- Logo & Title -->
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="rounded-circle overflow-hidden me-3"
+                    style="width:50px; height:50px; background-image:url('assets/img/lg.webp'); background-size:cover;"
+                    role="img" aria-label="Scout Manager Logo">
+                </div>
+                <h1 class="h5 mb-0" id="displayFullName"></h1>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-column nav nav-pills" role="navigation" aria-label="Main navigation">
+                <a href="dashboard.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="members.html" class="nav-link d-flex align-items-center mb-2 active" aria-current="page">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">groups</span>
+                    <span>Members</span>
+                </a>
+                <a href="attendance.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">check_circle</span>
+                    <span>Attendance</span>
+                </a>
+                <a href="activities.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">event</span>
+                    <span>Activities</span>
+                </a>
+                <a href="taxes.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">attach_money</span>
+                    <span>Taxes</span>
+                </a>
+                <a href="attendance-qr.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">qr_code_2</span>
+                    <span>QR Attendance</span>
+                </a>
+                <a href="whatsapp.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">chat</span>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="signIn.html" id="signOutBtn" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">logout</span>
+                    <span id="signOutText">Sign Out</span>
+                    <span id="signOutSpinner" class="spinner-border spinner-border-sm ms-2" role="status"
+                        style="display:none;" aria-hidden="true"></span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-fill p-4" role="main">
+            <!-- Header Section -->
+            <header class="d-flex align-items-center mb-4">
+                <h2 class="h2 mb-0">Members Management</h2>
+                <div id="currentDate" class="text-muted fs-6 mx-auto" role="timer"></div>
+
+                <!-- Action Buttons -->
+                <div class="ms-auto d-flex gap-2">
+                    <button id="btnAddMember" type="button"
+                        class="btn btn-primary d-flex align-items-center gap-2 shadow-sm" style="padding: 10px;"
+                        aria-label="Add new member">
+                        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+                        <span>Add Member</span>
+                    </button>
+                    <button class="btn btn-outline-primary d-flex align-items-center d-none" id="exportPdfBtn"
+                        aria-label="Export members list as PDF">
+                        <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                        <span>Export as PDF</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="d-flex flex-column gap-3">
+                <!-- Search & Action Buttons Row -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Search Input -->
+                    <div class="position-relative flex-grow-1">
+                        <label for="searchInput" class="visually-hidden">Search members</label>
+                        <span
+                            class="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ps-2 text-secondary"
+                            aria-hidden="true">search</span>
+                        <input type="search" id="searchInput" class="form-control ps-5 p-2"
+                            placeholder="Search members by name or code..." disabled
+                            aria-label="Search members by name or code">
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div id="actionButtons" class="d-flex gap-2" role="group" aria-label="Member actions">
+                        <button class="btn btn-outline-primary" data-target="editContent"
+                            aria-label="Edit member">Edit</button>
+                        <button class="btn btn-outline-primary" data-target="removeContent"
+                            aria-label="Delete member">Delete</button>
+                        <button class="btn btn-outline-primary" data-target="attendContent"
+                            aria-label="Mark attendance">Attend</button>
+                        <button id="showAllBtn" class="btn btn-outline-primary" data-target="showAllContent"
+                            aria-label="Show all members">Show All</button>
+                    </div>
+                </div>
+
+                <!-- Add Member Form -->
+                <section id="addContentDiv" class="table-responsive bg-light rounded shadow-sm border mx-auto d-none"
+                    style="max-width: 825px;" aria-labelledby="addMemberTitle">
+                    <form class="p-4" id="memberForm" novalidate>
+                        <h3 id="addMemberTitle" class="visually-hidden">Add New Member</h3>
+                        <div class="row g-3">
+                            <!-- Code -->
+                            <div class="col-md-6">
+                                <label for="memberCode" class="form-label">Code</label>
+                                <input type="text" class="form-control" id="memberCode" placeholder="Enter member code"
+                                    maxlength="6" required aria-describedby="codeError">
+                                <div id="codeError" class="text-danger mt-1" style="display:none;">
+                                    Code must be 6 digits.
+                                </div>
+                            </div>
+
+                            <!-- Full Name -->
+                            <div class="col-md-6">
+                                <label for="fullName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="fullName" placeholder="Enter full name"
+                                    required>
+                            </div>
+
+                            <!-- Title - FIXED VALUES -->
+                            <div class="col-md-6">
+                                <label for="titleSelect" class="form-label">Title</label>
+                                <select class="form-select" id="titleSelect" required>
+                                    <option value="" selected disabled>Select title</option>
+                                    <option value="Scout Leader">Scout Leader</option>
+                                    <option value="Scout Assistant">Scout Assistant</option>
+                                    <option value="Scout Member">Scout Member</option>
+                                </select>
+                            </div>
+
+                            <!-- Date of Birth -->
+                            <div class="col-md-6">
+                                <label for="dob" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" required>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone"
+                                    placeholder="Enter phone number (11 digits)" maxlength="11" required
+                                    aria-describedby="phoneError">
+                                <div id="phoneError" class="text-danger mt-1" style="display:none;">
+                                    Phone must be 11 digits and start with 01.
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="address" placeholder="Enter address"
+                                    required>
+                            </div>
+
+                            <!-- Category (Multi-select Checkboxes) -->
+                            <div class="col-md-12">
+                                <label class="form-label">Category</label>
+                                <div class="category-checkboxes" id="categoryCheckboxes">
+                                    <div class="form-check">
+                                        <input class="form-check-input category-checkbox" type="checkbox"
+                                            value="Scouts and Guides" id="categoryScouts">
+                                        <label class="form-check-label" for="categoryScouts">
+                                            Scouts and Guides
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input category-checkbox" type="checkbox"
+                                            value="Cubs and Blossoms" id="categoryCubs">
+                                        <label class="form-check-label" for="categoryCubs">
+                                            Cubs and Blossoms
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input category-checkbox" type="checkbox" value="Buds"
+                                            id="categoryBuds">
+                                        <label class="form-check-label" for="categoryBuds">
+                                            Buds
+                                        </label>
+                                    </div>
+                                </div>
+                                <div id="categoryError" class="text-danger mt-1" style="display:none;">
+                                    Please select at least one category.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-center">
+                            <button type="submit" class="btn btn-primary" id="saveBtn" disabled style="opacity: 0.5;">
+                                Save
+                            </button>
+                        </div>
+
+                        <div id="addAlert" class="alert alert-success d-none mt-3" role="alert"></div>
+                    </form>
+                </section>
+
+                <!-- Edit Member Form -->
+                <section id="editContent" class="table-responsive bg-light rounded shadow-sm border d-none mx-auto"
+                    style="width: 550px;" aria-labelledby="editMemberTitle">
+                    <form class="p-4" id="editForm" novalidate>
+                        <h3 id="editMemberTitle" class="visually-hidden">Edit Member</h3>
+                        <div class="row g-3">
+                            <!-- Search by Code -->
+                            <div class="col-md-6 position-relative">
+                                <label for="editCode" class="form-label">Member Code</label>
+                                <input type="text" class="form-control" id="editCode" placeholder="Enter member code"
+                                    maxlength="6" aria-describedby="editCodeError">
+                                <div class="invalid-feedback mt-2 d-none" id="editCodeError">
+                                    Code must be 6 digits.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-primary w-100" id="btnSearchMember"
+                                    disabled>
+                                    Search Member
+                                </button>
+                            </div>
+
+                            <!-- Editable Fields -->
+                            <div id="editFields" class="row g-3 mt-2 d-none">
+                                <div class="col-md-6">
+                                    <label for="editFullName" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="editFullName">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="editTitleSelect" class="form-label">Title</label>
+                                    <select class="form-select" id="editTitleSelect">
+                                        <option value="" selected disabled>Select title</option>
+                                        <option value="Scout Leader">Scout Leader</option>
+                                        <option value="Scout Assistant">Scout Assistant</option>
+                                        <option value="Scout Member">Scout Member</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="editDob" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" id="editDob">
+                                </div>
+
+                                <div class="col-md-6 position-relative">
+                                    <label for="editPhone" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="editPhone" maxlength="11"
+                                        aria-describedby="editPhoneError">
+                                    <div class="invalid-feedback mt-2 ms-2 d-none" id="editPhoneError">
+                                        Phone must be 11 digits and start with 01.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="editAddress" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="editAddress">
+                                </div>
+
+                                <!-- Category (Multi-select Checkboxes) -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Category</label>
+                                    <div class="category-checkboxes" id="editCategoryCheckboxes">
+                                        <div class="form-check">
+                                            <input class="form-check-input edit-category-checkbox" type="checkbox"
+                                                value="Scouts and Guides" id="editCategoryScouts">
+                                            <label class="form-check-label" for="editCategoryScouts">
+                                                Scouts and Guides
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input edit-category-checkbox" type="checkbox"
+                                                value="Cubs and Blossoms" id="editCategoryCubs">
+                                            <label class="form-check-label" for="editCategoryCubs">
+                                                Cubs and Blossoms
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input edit-category-checkbox" type="checkbox"
+                                                value="Buds" id="editCategoryBuds">
+                                            <label class="form-check-label" for="editCategoryBuds">
+                                                Buds
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div id="editCategoryError" class="text-danger mt-1" style="display:none;">
+                                        Please select at least one category.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-center">
+                            <button type="submit" class="btn btn-primary d-none" id="btnSaveChanges" disabled
+                                style="opacity: 0.5;">
+                                Save Changes
+                            </button>
+                        </div>
+
+                        <div id="editMessage" class="alert mt-3" style="display:none;" role="alert"></div>
+                    </form>
+                </section>
+
+                <!-- Delete Member Section -->
+                <section id="removeContent"
+                    class="table-responsive bg-light rounded shadow-sm border p-4 mx-auto d-none"
+                    style="max-width: 825px; width: 100%; height: 321px;" aria-labelledby="deleteMemberTitle">
+                    <h3 id="deleteMemberTitle" class="fw-semibold mb-3 text-center">Delete Member</h3>
+
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="w-50 text-start">
+                            <label for="memberCodeRemove" class="form-label fw-semibold mb-1">Code</label>
+                            <input type="text" id="memberCodeRemove" class="form-control" maxlength="6"
+                                placeholder="Enter member code to delete">
+                        </div>
+
+                        <button id="removeBtnMemeber" class="btn btn-outline-danger mt-3 d-none"
+                            aria-label="Confirm delete member">
+                            Delete
+                        </button>
+
+                        <div id="removeAlert" class="alert alert-success mt-3 w-50 p-2 d-none" role="alert">
+                            ✅ Member deleted successfully.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Attend Member Section -->
+                <section id="attendContent"
+                    class="table-responsive bg-light rounded shadow-sm border p-4 mx-auto d-none"
+                    style="max-width: 825px; width: 100%; height: auto;" aria-labelledby="attendMemberTitle">
+                    <h3 id="attendMemberTitle" class="fw-semibold mb-3 text-center">Attend Member</h3>
+
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="w-50 text-start">
+                            <label for="memberCodeattend" class="form-label fw-semibold mb-1">Code</label>
+                            <input type="text" id="memberCodeattend" class="form-control" maxlength="6"
+                                placeholder="Enter member code to attend">
+                        </div>
+
+                        <button class="btn btn-outline-success mt-3 d-none" aria-label="Mark attendance">
+                            Mark Attendance
+                        </button>
+
+                        <!-- Fine Question Dialog -->
+                        <div id="fineQuestion"
+                            class="mt-4 d-none text-center p-3 rounded-3 border shadow-sm bg-white w-75 mx-auto"
+                            style="max-width: 400px; transition: all 0.3s ease;" role="dialog"
+                            aria-labelledby="fineQuestionTitle">
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="material-symbols-outlined text-warning mb-2" style="font-size: 36px;"
+                                    aria-hidden="true">
+                                    payments
+                                </span>
+                                <p id="fineQuestionTitle" class="fw-semibold mb-3 fs-5 text-dark">
+                                    Do you want to pay a fine?
+                                </p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <button id="btnFineYes" class="btn btn-danger px-4">Yes</button>
+                                    <button id="btnFineNo" class="btn btn-outline-secondary px-4">No</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fine Amount Input -->
+                        <div id="fineAmountDiv" class="mt-3 d-none w-50 text-start">
+                            <label for="fineAmount" class="form-label fw-semibold mb-1">Enter fine amount</label>
+                            <div class="input-group">
+                                <input type="number" id="fineAmount" class="form-control" placeholder="Enter amount"
+                                    min="1" aria-label="Fine amount in EGP">
+                                <span class="input-group-text">EGP</span>
+                            </div>
+                            <button id="btnPayFine" class="btn btn-success mt-3 w-100 d-none">Pay Fine</button>
+                        </div>
+
+                        <div class="alert alert-success mt-3 w-50 p-2 d-none" role="alert">
+                            ✅ Attendance marked successfully.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Show All Members Table -->
+                <section id="showAllContent" class="table-responsive bg-light rounded shadow-sm border p-3"
+                    style="max-height: 400px; overflow-y: auto;" aria-labelledby="allMembersTitle">
+                    <h3 id="allMembersTitle" class="visually-hidden">All Members List</h3>
+                    <table class="table align-middle mb-0 text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col" class="text-uppercase">Code</th>
+                                <th scope="col" class="text-uppercase">Name</th>
+                                <th scope="col" class="text-uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTableBody"></tbody>
+                    </table>
+                </section>
+
+                <!-- Profile View -->
+                <section id="profileContent" class="table-responsive bg-light rounded shadow-sm border d-none mx-auto"
+                    style="width: 548px;" aria-labelledby="profileViewTitle">
+                    <form class="p-4" id="profileForm">
+                        <h3 id="profileViewTitle" class="visually-hidden">Member Profile</h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="profileCode" class="form-label">Member Code</label>
+                                <input type="text" id="profileCode" class="form-control" disabled readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profileFullName" class="form-label">Full Name</label>
+                                <input type="text" id="profileFullName" class="form-control" disabled readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profileTitle" class="form-label">Title</label>
+                                <input type="text" id="profileTitle" class="form-control" disabled readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profileDob" class="form-label">Date of Birth</label>
+                                <input type="text" id="profileDob" class="form-control" disabled readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profilePhone" class="form-label">Phone</label>
+                                <input type="text" id="profilePhone" class="form-control" disabled readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profileAddress" class="form-label">Address</label>
+                                <input type="text" id="profileAddress" class="form-control" disabled readonly>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="profileCategory" class="form-label">Category</label>
+                                <input type="text" id="profileCategory" class="form-control" disabled readonly>
+                            </div>
+
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/jspdf.umd.min.js"></script>
+    <script src="assets/js/jspdf.plugin.autotable.min.js"></script>
+    <script src="assets/js/members.js"></script>
+</body>
+
+</html>

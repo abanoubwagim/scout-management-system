@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scout Manager - Activities and Events Management">
+    <title>Scout Manager - Activities</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="assets/img/sc-ch.webp">
+    <!-- Icons & Fonts -->
+    <link href="assets/icons/material-symbols.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/icons/bootstrap-icons-1.13.1/bootstrap-icons.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/activities.css">
+</head>
+
+<body>
+    <div class="d-flex">
+
+        <!-- Sidebar -->
+        <aside class="sidebar bg-light p-3 d-flex flex-column shadow" style="width: 250px;" role="navigation">
+
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="rounded-circle overflow-hidden me-3"
+                    style="width:50px; height:50px; background-image:url('assets/img/lg.webp'); background-size:cover;"
+                    role="img" aria-label="Scout Manager Logo"></div>
+                <h1 class="h5 mb-0" id="displayFullName"></h1>
+            </div>
+
+            <nav class="flex-column nav nav-pills">
+                <a href="dashboard.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="members.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">groups</span>
+                    <span>Members</span>
+                </a>
+                <a href="attendance.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">check_circle</span>
+                    <span>Attendance</span>
+                </a>
+                <a href="activities.html" class="nav-link d-flex align-items-center mb-2 active" aria-current="page">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">event</span>
+                    <span>Activities</span>
+                </a>
+                <a href="taxes.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">attach_money</span>
+                    <span>Taxes</span>
+                </a>
+                <a href="attendance-qr.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">qr_code_2</span>
+                    <span>QR Attendance</span>
+                </a>
+                <a href="whatsapp.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">chat</span>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="signIn.html" id="signOutBtn" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">logout</span>
+                    <span id="signOutText">Sign Out</span>
+                    <span id="signOutSpinner" class="spinner-border spinner-border-sm ms-2" role="status"
+                        aria-hidden="true" style="display:none;"></span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-fill p-4" role="main">
+
+            <!-- Header -->
+            <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h2 class="h2 mb-0">Activities Management</h2>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div class="date-time-display">
+                        <span class="material-symbols-outlined me-1" aria-hidden="true">calendar_today</span>
+                        <span id="currentDate" class="text-secondary fw-semibold"></span>
+                    </div>
+                    <button id="exportPdfBtn" class="btn btn-outline-primary d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                        <span>Export PDF</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Statistics Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <div class="stat-icon bg-primary-subtle mb-2">
+                            <span class="material-symbols-outlined text-primary">event</span>
+                        </div>
+                        <h6 class="text-muted mb-1">Total Activities</h6>
+                        <p class="fs-4 fw-bold text-primary mb-0" id="totalActivities">0</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <div class="stat-icon bg-warning-subtle mb-2">
+                            <span class="material-symbols-outlined text-warning">pending</span>
+                        </div>
+                        <h6 class="text-muted mb-1">Upcoming</h6>
+                        <p class="fs-4 fw-bold text-warning mb-0" id="upcomingActivities">0</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <div class="stat-icon bg-success-subtle mb-2">
+                            <span class="material-symbols-outlined text-success">check_circle</span>
+                        </div>
+                        <h6 class="text-muted mb-1">Completed</h6>
+                        <p class="fs-4 fw-bold text-success mb-0" id="completedActivities">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+
+                <!-- Add Activity Form -->
+                <div class="col-lg-4">
+                    <section class="card-custom bg-white p-4 rounded-xl shadow-sm border">
+                        <h3 class="h5 mb-4 fw-bold">
+                            <span class="material-symbols-outlined align-middle me-2">add_circle</span>
+                            Add New Activity
+                        </h3>
+
+                        <form id="activityForm" novalidate>
+                            <div class="mb-3">
+                                <label for="activityName" class="form-label fw-semibold">Activity Name</label>
+                                <input type="text" class="form-control" id="activityName"
+                                    placeholder="e.g., Summer Camp" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="date" class="form-label fw-semibold">Date</label>
+                                <input type="date" class="form-control" id="date" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="location" class="form-label fw-semibold">Location</label>
+                                <input type="text" class="form-control" id="location" placeholder="e.g., Church Hall"
+                                    required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label fw-semibold">Description</label>
+                                <textarea class="form-control" id="description" rows="4"
+                                    placeholder="A brief description..." required></textarea>
+                            </div>
+
+                            <button type="submit" id="saveBtn" class="btn btn-primary w-100 fw-semibold" disabled>
+                                <span class="material-symbols-outlined align-middle me-1">save</span>
+                                Save Activity
+                            </button>
+                        </form>
+
+                        <div id="successAlert" class="alert alert-success mt-3 d-none" role="alert"></div>
+                    </section>
+                </div>
+
+                <!-- Activities Table -->
+                <div class="col-lg-8">
+                    <section class="card-custom bg-white p-4 rounded-xl shadow-sm border">
+                        <h3 class="h5 mb-4 fw-bold">
+                            <span class="material-symbols-outlined align-middle me-2">pending</span>
+                            Upcoming Activities
+                        </h3>
+
+                        <div class="table-wrapper">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-hover mb-0" id="activitiesTable">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Activity Name</th>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Location</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col" class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="activitiesTableBody"></tbody>
+                                </table>
+                            </div>
+
+                            <div id="noActivitiesMessage" class="text-center py-5 d-none">
+                                <span class="material-symbols-outlined text-muted mb-3" style="font-size: 64px;">
+                                    event_busy
+                                </span>
+                                <p class="text-muted">No upcoming activities found</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Remove Activity Section -->
+            <section class="card-custom bg-white p-4 rounded-xl shadow-sm border mt-4">
+                <h3 class="h5 mb-3 fw-bold">
+                    <span class="material-symbols-outlined align-middle me-2 text-danger">delete</span>
+                    Remove Activity
+                </h3>
+
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div class="flex-grow-1">
+                        <label for="activityId" class="form-label fw-semibold">Activity ID</label>
+                        <input type="text" class="form-control" id="activityId" placeholder="Enter ID"
+                            aria-describedby="activityIdHelp">
+                        <small id="activityIdHelp" class="form-text text-muted">
+                            Enter a numeric ID from the table
+                        </small>
+                    </div>
+
+                    <div style="margin-top: 9px;">
+                        <button id="removeBtn" class="btn btn-danger fw-semibold mb-1" disabled>
+                            <span class="material-symbols-outlined align-middle me-1">delete_forever</span>
+                            Remove
+                        </button>
+                    </div>
+                    <div id="removeAlert" class="alert alert-success d-none mt-3"></div>
+
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/jspdf.umd.min.js"></script>
+    <script src="assets/js/jspdf.plugin.autotable.min.js"></script>
+    <script src="assets/js/activities.js"></script>
+
+</body>
+
+</html>

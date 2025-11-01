@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scout Manager - Financial Management and Taxes">
+    <title>Scout Manager - Taxes</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="assets/img/sc-ch.webp">
+
+    <!-- Icons & Fonts -->
+    <link href="assets/icons/material-symbols.css" rel="stylesheet" />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/taxes.css">
+</head>
+
+<body>
+    <div class="d-flex">
+
+        <!-- Sidebar -->
+        <aside class="sidebar bg-light p-3 d-flex flex-column shadow" style="width: 250px;" role="navigation"
+            aria-label="Main navigation">
+
+            <!-- Logo & Title -->
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="rounded-circle overflow-hidden me-3"
+                    style="width:50px; height:50px; background-image:url('assets/img/lg.webp'); background-size:cover;"
+                    role="img" aria-label="Scout Manager Logo">
+                </div>
+                <h1 class="h5 mb-0" id="displayFullName"></h1>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-column nav nav-pills">
+                <a href="dashboard.html" class="nav-link d-flex align-items-center ">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="members.html" class="nav-link d-flex align-items-center ">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">groups</span>
+                    <span>Members</span>
+                </a>
+                <a href="attendance.html" class="nav-link d-flex align-items-center ">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">check_circle</span>
+                    <span>Attendance</span>
+                </a>
+                <a href="activities.html" class="nav-link d-flex align-items-center ">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">event</span>
+                    <span>Activities</span>
+                </a>
+                <a href="taxes.html" class="nav-link d-flex align-items-center active" aria-current="page">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">attach_money</span>
+                    <span>Taxes</span>
+                </a>
+                <a href="attendance-qr.html" class="nav-link d-flex align-items-center ">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">qr_code_2</span>
+                    <span>QR Attendance</span>
+                </a>
+                <a href="whatsapp.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">chat</span>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="signIn.html" id="signOutBtn" class="nav-link d-flex align-items-center ">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">logout</span>
+                    <span id="signOutText">Sign Out</span>
+                    <span id="signOutSpinner" class="spinner-border spinner-border-sm ms-2" role="status"
+                        aria-hidden="true" style="display:none;"></span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-fill p-4" role="main">
+
+            <!-- Header -->
+            <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h2 class="h2 mb-0">
+                    <span class="material-symbols-outlined align-middle me-2" aria-hidden="true">payments</span>
+                    Financial Management
+                </h2>
+
+                <!-- Export Buttons Group -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <!-- Main Export PDF Button -->
+                    <button id="exportPdfBtn" class="btn btn-outline-primary d-flex align-items-center gap-2"
+                        aria-label="Export all taxes report as PDF">
+                        <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                        <span>Export All</span>
+                    </button>
+
+                    <!-- Dropdown for Category Exports -->
+                    <div class="btn-group" role="group">
+                        <button type="button"
+                            class="btn btn-outline-success dropdown-toggle d-flex align-items-center gap-2"
+                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Export by category">
+                            <span class="material-symbols-outlined" aria-hidden="true">category</span>
+                            <span>Export by Category</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center gap-2" id="exportScoutsGuidesBtn"
+                                    aria-label="Export Scouts and Guides taxes">
+                                    <span class="material-symbols-outlined text-primary"
+                                        aria-hidden="true">hiking</span>
+                                    <span>Scouts & Guides</span>
+                                </button>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center gap-2" id="exportCubsBtn"
+                                    aria-label="Export Cubs and Blossoms taxes">
+                                    <span class="material-symbols-outlined text-warning"
+                                        aria-hidden="true">sports_kabaddi</span>
+                                    <span>Cubs & Blossoms</span>
+                                </button>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center gap-2" id="exportBudsBtn"
+                                    aria-label="Export Buds taxes">
+                                    <span class="material-symbols-outlined text-success"
+                                        aria-hidden="true">child_care</span>
+                                    <span>Buds</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Statistics Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <div class="stat-icon bg-success-subtle mb-2">
+                            <span class="material-symbols-outlined text-success">account_balance_wallet</span>
+                        </div>
+                        <h6 class="text-muted mb-1">Total Revenue</h6>
+                        <p class="fs-4 fw-bold text-success mb-0" id="totalRevenue">0 EGP</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <div class="stat-icon bg-primary-subtle mb-2">
+                            <span class="material-symbols-outlined text-primary">calendar_month</span>
+                        </div>
+                        <h6 class="text-muted mb-1">This Month</h6>
+                        <p class="fs-4 fw-bold text-primary mb-0" id="thisMonth">0 EGP</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <div class="stat-icon bg-warning-subtle mb-2">
+                            <span class="material-symbols-outlined text-warning">receipt_long</span>
+                        </div>
+                        <h6 class="text-muted mb-1">Transactions</h6>
+                        <p class="fs-4 fw-bold text-warning mb-0" id="transactionCount">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-pills mb-4" id="tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="day-tab" data-tab="day" type="button" role="tab"
+                        aria-controls="day-panel" aria-selected="true">
+                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true">today</span>
+                        Per Day
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="month-tab" data-tab="month" type="button" role="tab"
+                        aria-controls="month-panel" aria-selected="false">
+                        <span class="material-symbols-outlined align-middle me-1"
+                            aria-hidden="true">calendar_today</span>
+                        Per Month
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Table Card -->
+            <section class="table-container bg-white rounded-xl shadow-sm border p-4" aria-labelledby="taxTableTitle">
+                <h3 id="taxTableTitle" class="visually-hidden">Tax Records</h3>
+
+                <div class="table-responsive">
+                    <table id="taxTable" class="table table-hover align-middle text-center mb-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Day </th>
+                                <th scope="col">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- No Data Message -->
+                <div class="text-center text-muted py-5 d-none" id="noDataMessage">
+                    <span class="material-symbols-outlined mb-3" style="font-size: 64px; opacity: 0.3;"
+                        aria-hidden="true">
+                        money_off
+                    </span>
+                    <p class="mb-0">No financial records available</p>
+                </div>
+            </section>
+
+            <!-- Total Amount Display -->
+            <div class="total-amount text-center mt-4 d-none" id="totalAmount" role="status" aria-live="polite"></div>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/jspdf.umd.min.js"></script>
+    <script src="assets/js/jspdf.plugin.autotable.min.js"></script>
+    <script src="assets/js/taxes.js"></script>
+
+</body>
+
+</html>

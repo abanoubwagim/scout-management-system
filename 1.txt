@@ -1,0 +1,3 @@
+To add new admin -> http://localhost:9090/register?fullName=[Your First Name]%20[Your Second Name]&userName=[Your username]&password=[Your password]
+To get All Admin -> http://localhost:9090/allAdmins
+back up -> http://localhost:9090/members/backup
