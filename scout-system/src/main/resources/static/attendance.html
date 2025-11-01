@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scout Manager - Attendance Tracking and Management">
+    <title>Scout Manager - Attendance</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="assets/img/sc-ch.webp">
+    <!-- Icons & Fonts -->
+    <link href="assets/icons/material-symbols.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/icons/bootstrap-icons-1.13.1/bootstrap-icons.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/attendance.css">
+</head>
+
+<body>
+    <div class="d-flex">
+
+        <!-- Sidebar -->
+        <aside class="sidebar bg-light p-3 d-flex flex-column shadow" style="width: 250px;" role="navigation"
+            aria-label="Main navigation">
+
+            <!-- Logo & Title -->
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="rounded-circle overflow-hidden me-3"
+                    style="width:50px; height:50px; background-image:url('assets/img/lg.webp'); background-size:cover;"
+                    role="img" aria-label="Scout Manager Logo">
+                </div>
+                <h1 class="h5 mb-0" id="displayFullName"></h1>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-column nav nav-pills">
+                <a href="dashboard.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="members.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">groups</span>
+                    <span>Members</span>
+                </a>
+                <a href="attendance.html" class="nav-link d-flex align-items-center mb-2 active" aria-current="page">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">check_circle</span>
+                    <span>Attendance</span>
+                </a>
+                <a href="activities.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">event</span>
+                    <span>Activities</span>
+                </a>
+                <a href="taxes.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">attach_money</span>
+                    <span>Taxes</span>
+                </a>
+
+                <a href="attendance-qr.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">qr_code_2</span>
+                    <span>QR Attendance</span>
+                </a>
+                <a href="whatsapp.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">chat</span>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="signIn.html" id="signOutBtn" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">logout</span>
+                    <span id="signOutText">Sign Out</span>
+                    <span id="signOutSpinner" class="spinner-border spinner-border-sm ms-2" role="status"
+                        aria-hidden="true" style="display:none;"></span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-fill p-4" role="main">
+
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h2 class="h2 mb-0">Attendance Management</h2>
+                
+                <!-- Export Buttons Group -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <!-- Main Export PDF Button -->
+                    <button id="exportPdfBtn" class="btn btn-outline-primary d-flex align-items-center gap-2"
+                        aria-label="Export all attendance as PDF">
+                        <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                        <span>Export All</span>
+                    </button>
+
+                    <!-- Dropdown for Category Exports -->
+                    <div class="btn-group" role="group">
+                        <button type="button"
+                            class="btn btn-outline-success dropdown-toggle d-flex align-items-center gap-2"
+                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Export by category">
+                            <span class="material-symbols-outlined" aria-hidden="true">category</span>
+                            <span>Export by Category</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center gap-2" id="exportScoutsGuidesBtn"
+                                    aria-label="Export Scouts and Guides attendance">
+                                    <span class="material-symbols-outlined text-primary"
+                                        aria-hidden="true">hiking</span>
+                                    <span>Scouts & Guides</span>
+                                </button>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center gap-2" id="exportCubsBtn"
+                                    aria-label="Export Cubs and Blossoms attendance">
+                                    <span class="material-symbols-outlined text-warning"
+                                        aria-hidden="true">sports_kabaddi</span>
+                                    <span>Cubs & Blossoms</span>
+                                </button>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <button class="dropdown-item d-flex align-items-center gap-2" id="exportBudsBtn"
+                                    aria-label="Export Buds attendance">
+                                    <span class="material-symbols-outlined text-success"
+                                        aria-hidden="true">child_care</span>
+                                    <span>Buds</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Search & Date Row -->
+            <div class="d-flex justify-content-center align-items-center mb-4 flex-wrap gap-3">
+
+                <!-- Search Input -->
+                <div class="position-relative search-wrapper">
+                    <label for="searchInput" class="visually-hidden">Search members</label>
+                    <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
+                    <input type="search" id="searchInput" class="form-control"
+                        placeholder="Search members by name or code..." aria-label="Search members by name or code">
+                </div>
+
+                <!-- Current Date Display -->
+                <div class="date-display">
+                    <span class="material-symbols-outlined me-1" aria-hidden="true">calendar_today</span>
+                    <span id="currentDate" class="text-muted fw-semibold"></span>
+                </div>
+            </div>
+
+            <!-- Attendance Statistics -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <h6 class="text-muted mb-2">Total</h6>
+                        <p class="fs-4 fw-bold text-primary mb-0" id="totalCount">0</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <h6 class="text-muted mb-2">Present</h6>
+                        <p class="fs-4 fw-bold text-success mb-0" id="presentCount">0</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card bg-white p-3 rounded shadow-sm text-center">
+                        <h6 class="text-muted mb-2">Absent</h6>
+                        <p class="fs-4 fw-bold text-danger mb-0" id="absentCount">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Table -->
+            <section class="table-container bg-white rounded-xl shadow-sm border"
+                aria-labelledby="attendanceTableTitle">
+                <h3 id="attendanceTableTitle" class="visually-hidden">Attendance Records</h3>
+
+
+                <div class="table-responsive p-3">
+                    <table id="attendanceTable" class="table table-hover align-middle text-center mb-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Code</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- No Data Message -->
+                <div id="noDataMessage" class="text-center py-5 d-none">
+                    <span class="material-symbols-outlined text-muted" style="font-size: 64px;" aria-hidden="true">
+                        inbox
+                    </span>
+                    <p class="text-muted mt-3">No attendance records found</p>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/jspdf.umd.min.js"></script>
+    <script src="assets/js/attendance.js"></script>
+
+</body>
+
+</html>

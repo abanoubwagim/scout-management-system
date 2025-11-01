@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Scout QR Attendance System - Quick Check-in">
+    <meta name="theme-color" content="#0B5ED7">
+    <title>Scout QR Attendance</title>
+
+    <style>
+        /* ====== General Styles ====== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0B5ED7 0%, #084298 100%);
+            color: #212529;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: clamp(10px, 3vw, 20px);
+        }
+
+        main {
+            background: #fff;
+            padding: clamp(25px, 5vw, 40px) clamp(20px, 4vw, 30px);
+            border-radius: clamp(15px, 3vw, 20px);
+            box-shadow: 0 20px 60px rgba(11, 94, 215, 0.4);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ====== Header Section ====== */
+        .header-icon {
+            width: clamp(60px, 15vw, 80px);
+            height: clamp(60px, 15vw, 80px);
+            margin: 0 auto clamp(15px, 3vw, 20px);
+            background: linear-gradient(135deg, #0B5ED7 0%, #084298 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(11, 94, 215, 0.4);
+            animation: pulse 2s infinite;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 35px rgba(11, 94, 215, 0.5);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 10px 25px rgba(11, 94, 215, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 10px 40px rgba(11, 94, 215, 0.6);
+            }
+        }
+
+        .header-icon svg {
+            width: clamp(35px, 8vw, 45px);
+            height: clamp(35px, 8vw, 45px);
+            fill: white;
+            transition: opacity 0.3s ease;
+        }
+
+        .header-icon img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .header-icon:hover svg {
+            opacity: 0;
+        }
+
+        .header-icon:hover img {
+            opacity: 1;
+        }
+
+        h2 {
+            color: #212529;
+            margin-bottom: 5px;
+            font-size: clamp(22px, 5vw, 28px);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            font-size: clamp(12px, 3vw, 14px);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        #dateLabel {
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: clamp(20px, 4vw, 30px);
+            font-size: clamp(13px, 3vw, 15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        #dateLabel svg {
+            width: clamp(16px, 4vw, 18px);
+            height: clamp(16px, 4vw, 18px);
+            fill: #0B5ED7;
+        }
+
+        /* ====== Connection Status ====== */
+        .connection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: clamp(5px, 1.5vw, 6px) clamp(10px, 2.5vw, 12px);
+            border-radius: 20px;
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-weight: 600;
+            margin-bottom: clamp(15px, 3vw, 20px);
+            transition: all 0.3s ease;
+        }
+
+        .connection-badge.online {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .connection-badge.offline {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .connection-badge .dot {
+            width: clamp(6px, 2vw, 8px);
+            height: clamp(6px, 2vw, 8px);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        .connection-badge.online .dot {
+            background: #198754;
+        }
+
+        .connection-badge.offline .dot {
+            background: #dc3545;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* ====== Form Styles ====== */
+        form {
+            margin-top: clamp(15px, 3vw, 20px);
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: clamp(6px, 2vw, 8px);
+            font-size: clamp(14px, 3vw, 15px);
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: clamp(12px, 3vw, 15px) clamp(15px, 3vw, 20px);
+            padding-left: clamp(45px, 10vw, 50px);
+            border-radius: clamp(10px, 2vw, 12px);
+            border: 2px solid #dee2e6;
+            font-size: clamp(18px, 4vw, 20px);
+            font-weight: 600;
+            letter-spacing: clamp(1px, 0.3vw, 2px);
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        input:focus {
+            border-color: #0B5ED7;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(11, 94, 215, 0.1);
+        }
+
+        input.is-valid {
+            border-color: #198754;
+            background: #d1e7dd;
+        }
+
+        input.is-invalid {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: clamp(15px, 3vw, 18px);
+            top: 50%;
+            transform: translateY(-50%);
+            width: clamp(18px, 4vw, 20px);
+            height: clamp(18px, 4vw, 20px);
+            opacity: 0.5;
+        }
+
+        .text-danger {
+            color: #dc3545;
+            font-size: clamp(12px, 2.5vw, 13px);
+            margin-top: 5px;
+            text-align: left;
+            font-weight: 500;
+            display: none;
+        }
+
+        .text-danger.show {
+            display: block;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        /* ====== Button Styles ====== */
+        button {
+            width: 100%;
+            padding: clamp(14px, 3vw, 16px) clamp(20px, 4vw, 24px);
+            margin-top: clamp(15px, 3vw, 20px);
+            background: linear-gradient(135deg, #0B5ED7 0%, #084298 100%);
+            color: #fff;
+            border: none;
+            border-radius: clamp(10px, 2vw, 12px);
+            cursor: pointer;
+            font-size: clamp(15px, 3vw, 17px);
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(11, 94, 215, 0.4);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(11, 94, 215, 0.5);
+            background: linear-gradient(135deg, #0a58ca 0%, #073d7a 100%);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: clamp(18px, 4vw, 20px);
+            height: clamp(18px, 4vw, 20px);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            position: absolute;
+            left: clamp(15px, 3vw, 20px);
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: translateY(-50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
+        button.loading .spinner {
+            display: block;
+        }
+
+        button.loading {
+            pointer-events: none;
+        }
+
+        /* ====== Message Styles ====== */
+        #message {
+            margin-top: clamp(15px, 3vw, 20px);
+            padding: clamp(12px, 2.5vw, 15px) clamp(15px, 3vw, 20px);
+            border-radius: clamp(8px, 2vw, 10px);
+            font-weight: 500;
+            font-size: clamp(13px, 3vw, 15px);
+            display: none;
+            animation: slideIn 0.3s ease;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #message.success {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+            display: block;
+        }
+
+        #message.error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+            display: block;
+        }
+
+        #message.warning {
+            background: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffecb5;
+            display: block;
+        }
+
+        #message svg {
+            width: clamp(18px, 4vw, 20px);
+            height: clamp(18px, 4vw, 20px);
+            vertical-align: middle;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        /* ====== Stats Section ====== */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: clamp(8px, 2vw, 10px);
+            margin-top: clamp(20px, 4vw, 25px);
+            padding-top: clamp(20px, 4vw, 25px);
+            border-top: 1px solid #dee2e6;
+        }
+
+        .stat-item {
+            padding: clamp(12px, 3vw, 15px);
+            background: #f8f9fa;
+            border-radius: clamp(8px, 2vw, 10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: #e7f1ff;
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: clamp(11px, 2.5vw, 12px);
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .stat-value {
+            font-size: clamp(20px, 5vw, 24px);
+            font-weight: 700;
+            color: #212529;
+            word-break: break-word;
+        }
+
+        .stat-value.success {
+            color: #198754;
+        }
+
+        .stat-value.primary {
+            color: #0B5ED7;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-overlay .spinner-large {
+            width: clamp(40px, 10vw, 50px);
+            height: clamp(40px, 10vw, 50px);
+            border: clamp(4px, 1vw, 5px) solid rgba(11, 94, 215, 0.2);
+            border-top-color: #0B5ED7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Category Selection */
+        #categorySelection {
+            margin-top: clamp(15px, 3vw, 20px);
+            padding: clamp(20px, 4vw, 25px);
+            background: white;
+            border-radius: clamp(12px, 3vw, 15px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .category-select-btn {
+            width: 100%;
+            padding: clamp(12px, 3vw, 14px) clamp(16px, 4vw, 20px);
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: clamp(8px, 2vw, 10px);
+            font-weight: 500;
+            color: #212529;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: clamp(14px, 3vw, 16px);
+        }
+
+        .category-select-btn:hover:not(:disabled) {
+            border-color: #0B5ED7;
+            background: #e7f1ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(11, 94, 215, 0.2);
+        }
+
+        .category-select-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* ====== Responsive Breakpoints ====== */
+
+        @media (max-width: 374px) {
+            html {
+                font-size: 14px;
+            }
+
+            main {
+                padding: 20px 15px;
+            }
+
+            .header-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .header-icon svg {
+                width: 35px;
+                height: 35px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+            }
+
+            input {
+                font-size: 16px;
+                padding: 12px 15px;
+                padding-left: 40px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 12px 18px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            main {
+                padding: 40px 30px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+
+        @media (max-height: 600px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+
+            main {
+                padding: 20px;
+                max-height: 95vh;
+                overflow-y: auto;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            button {
+                min-height: 44px;
+            }
+
+            input {
+                min-height: 44px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-large"></div>
+    </div>
+
+    <main>
+        <div class="header-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm15 0h3v3h-3v-3zm0 5h3v3h-3v-3zm-5-5h3v3h-3v-3zm0 5h3v3h-3v-3z" />
+            </svg>
+            <img src="assets/img/lg-pdf.png" alt="Scout Logo" />
+        </div>
+
+        <h2>Scout QR Attendance</h2>
+        <p class="subtitle">📍 Scout Mar-Mina Church</p>
+
+        <div id="connectionBadge" class="connection-badge offline">
+            <span class="dot"></span>
+            <span id="connectionText">Connecting...</span>
+        </div>
+
+        <p id="dateLabel">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z" />
+            </svg>
+            <span id="dateText"></span>
+        </p>
+
+        <form id="qrForm">
+            <label for="code">Enter Your 6-Digit Scout Code</label>
+            <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#0B5ED7">
+                    <path
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" />
+                </svg>
+                <input id="code" name="code" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="000000"
+                    autocomplete="off" required aria-label="Enter your 6-digit scout code">
+            </div>
+            <div id="codeError" class="text-danger">
+                ⚠️ Code must be exactly 6 digits
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <div class="spinner" id="spinner"></div>
+                <span id="buttonText">✓ Submit Attendance</span>
+            </button>
+        </form>
+
+        <div id="message" role="status" aria-live="polite"></div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-label">Today's Check-ins</div>
+                <div class="stat-value primary" id="todayCount">--</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Your Status</div>
+                <div class="stat-value" id="userStatus">Pending</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://192.168.137.1:9090';
+        const API_ENDPOINTS = {
+            checkIn: `${API_BASE_URL}/attendance/attend`,
+            getStats: `${API_BASE_URL}/attendance/lateToday`,
+            getMember: `${API_BASE_URL}/members/member`,
+            checkAttendance: `${API_BASE_URL}/checkAttendance`
+        };
+
+        // Elements
+        const form = document.getElementById('qrForm');
+        const codeInput = document.getElementById('code');
+        const codeError = document.getElementById('codeError');
+        const msg = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const buttonText = document.getElementById('buttonText');
+        const todayCount = document.getElementById('todayCount');
+        const userStatus = document.getElementById('userStatus');
+        const connectionBadge = document.getElementById('connectionBadge');
+        const connectionText = document.getElementById('connectionText');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        let currentMember = null;
+        let selectedCategory = null;
+
+        // UI Helper Functions
+        function showLoading() {
+            if (loadingOverlay) loadingOverlay.classList.add('show');
+        }
+
+        function hideLoading() {
+            if (loadingOverlay) loadingOverlay.classList.remove('show');
+        }
+
+        // Display Current Date
+        function updateDate() {
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-GB', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('dateText').textContent = formattedDate;
+        }
+
+        // Connection Status
+        function updateConnectionStatus(isOnline) {
+            if (isOnline) {
+                connectionBadge.classList.remove('offline');
+                connectionBadge.classList.add('online');
+                connectionText.textContent = 'Connected';
+            } else {
+                connectionBadge.classList.remove('online');
+                connectionBadge.classList.add('offline');
+                connectionText.textContent = 'Offline';
+            }
+        }
+
+        async function checkConnection() {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(API_ENDPOINTS.getStats, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                updateConnectionStatus(response.ok);
+                return response.ok;
+            } catch (error) {
+                console.error('Connection check failed:', error);
+                updateConnectionStatus(false);
+                return false;
+            }
+        }
+
+        // Validation Function
+        function isCodeValid(v) {
+            return /^\d{6}$/.test(v.trim());
+        }
+
+        // Real-time Input Validation
+        codeInput.addEventListener('input', () => {
+            codeInput.value = codeInput.value.replace(/\D/g, '').slice(0, 6);
+            const value = codeInput.value;
+
+            if (value.length === 0) {
+                codeInput.classList.remove('is-valid', 'is-invalid');
+                codeError.classList.remove('show');
+            } else if (isCodeValid(value)) {
+                codeInput.classList.remove('is-invalid');
+                codeInput.classList.add('is-valid');
+                codeError.classList.remove('show');
+                submitBtn.disabled = false;
+            } else {
+                codeInput.classList.remove('is-valid');
+                codeInput.classList.add('is-invalid');
+                codeError.classList.add('show');
+                submitBtn.disabled = true;
+            }
+
+            const categorySelection = document.getElementById('categorySelection');
+            if (categorySelection && value.length < 6) {
+                categorySelection.remove();
+                currentMember = null;
+                selectedCategory = null;
+            }
+        });
+
+        // Check if Member Already Attended Today
+        async function checkIfAlreadyAttended(code, category) {
+            try {
+                const response = await fetch(`${API_ENDPOINTS.checkAttendance}/${code}/${category}`);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    return result.hasAttended || false;
+                }
+
+                return false;
+            } catch (error) {
+                console.error('Error checking attendance:', error);
+                return false;
+            }
+        }
+
+        // Time Window Management
+        function isCategoryTimeActive(category) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+            const parseTime = (timeStr) => {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return hours * 60 + minutes;
+            };
+
+            const timeWindows = {
+                'Cubs and Blossoms': {
+                    start: parseTime('11:55'),
+                    end: parseTime('12:30')
+                },
+                'Scouts and Guides': {
+                    start: parseTime('11:55'),
+                    end: parseTime('12:30')
+                },
+                'Buds': {
+                    start: parseTime('11:00'),
+                    end: parseTime('11:50')
+                }
+            };
+
+            const window = timeWindows[category];
+            if (!window) return true;
+
+            return currentTimeInMinutes >= window.start && currentTimeInMinutes < window.end;
+        }
+
+        function getCategoryTimeRange(category) {
+            const timeRanges = {
+                'Cubs and Blossoms': '11:55 AM - 12:30 PM',
+                'Scouts and Guides': '11:55 AM - 12:30 PM',
+                'Buds': '11:00 AM - 11:50 AM'
+            };
+            return timeRanges[category] || '';
+        }
+
+        function isScoutLeader(member) {
+            return member && member.title && member.title.toLowerCase() === 'scout leader';
+        }
+
+        // Show Category Selection
+        function showCategorySelection(categories, memberName, code) {
+            const existingSelection = document.getElementById('categorySelection');
+            if (existingSelection) {
+                existingSelection.remove();
+            }
+
+            const isLeader = isScoutLeader(currentMember);
+
+            const categoryDiv = document.createElement('div');
+            categoryDiv.id = 'categorySelection';
+            categoryDiv.style.cssText = `
+                margin-top: clamp(18px, 4vw, 22px);
+                padding: clamp(20px, 5vw, 28px) clamp(18px, 4vw, 25px);
+                background: white;
+                border-radius: clamp(12px, 3vw, 16px);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                animation: fadeInUp 0.3s ease;
+            `;
+
+            categoryDiv.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0B5ED7 0%, #084298 100%); 
+                                border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                        <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <p style="font-size: 18px; font-weight: 600; color: #212529; margin-bottom: 8px;">
+                        ${memberName}
+                        ${isLeader ? '<span style="display: inline-block; background: #198754; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; margin-left: 8px; font-weight: 600;">Scout Leader</span>' : ''}
+                    </p>
+                    <p style="font-size: 14px; color: #6c757d; margin-bottom: 20px;">
+                        Select your attendance category:
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                        ${categories.map(cat => {
+                const isActive = isLeader ? true : isCategoryTimeActive(cat);
+                const timeRange = getCategoryTimeRange(cat);
+
+                return `
+                                <button class="category-select-btn" 
+                                        data-category="${cat}"
+                                        ${!isActive ? 'disabled' : ''}
+                                        style="padding: 14px 20px; background: ${isActive ? 'white' : '#f8f9fa'}; 
+                                               border: 2px solid ${isActive ? '#dee2e6' : '#e9ecef'}; 
+                                               border-radius: 12px; font-weight: 500; 
+                                               color: ${isActive ? '#212529' : '#adb5bd'}; 
+                                               cursor: ${isActive ? 'pointer' : 'not-allowed'};
+                                               transition: all 0.3s ease; display: flex; flex-direction: column; gap: 6px; 
+                                               font-size: clamp(14px, 3.5vw, 16px);
+                                               opacity: ${isActive ? '1' : '0.6'}; text-align: left;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                        <span style="font-weight: 600; font-size: clamp(15px, 3.5vw, 17px);">${cat}</span>
+                                        ${!isActive ? '<span style="font-size: clamp(18px, 4vw, 20px);">🔒</span>' : ''}
+                                    </div>
+                                    ${!isLeader ? `
+                                    <div style="font-size: clamp(11px, 2.5vw, 12px); color: ${isActive ? '#6c757d' : '#adb5bd'}; display: flex; align-items: center; gap: 5px;">
+                                        <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24" style="flex-shrink: 0;">
+                                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/>
+                                        </svg>
+                                        <span>${timeRange}</span>
+                                    </div>
+                                    ` : ''}
+                                    ${!isActive && !isLeader ? '<div style="font-size: clamp(10px, 2.3vw, 11px); color: #dc3545; font-weight: 600; margin-top: 2px;">⏰ Time window closed</div>' : ''}
+                                </button>
+                            `;
+            }).join('')}
+                    </div>
+                    ${!isLeader ? `
+                    <div style="margin-top: 15px; padding: 10px; background: #e7f1ff; border-radius: 8px; font-size: 13px; color: #084298; display: flex; align-items: center; gap: 6px;">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        <span>You can only check in during the category's time window</span>
+                    </div>
+                    ` : `
+                    <div style="margin-top: 15px; padding: 10px; background: #d1e7dd; border-radius: 8px; font-size: 13px; color: #0f5132; display: flex; align-items: center; gap: 6px;">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        <span>Scout Leaders can attend anytime without time restrictions</span>
+                    </div>
+                    `}
+                </div>
+            `;
+
+            form.insertAdjacentElement('beforebegin', categoryDiv);
+
+            const categoryButtons = categoryDiv.querySelectorAll('.category-select-btn:not([disabled])');
+            categoryButtons.forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    btn.style.borderColor = '#0B5ED7';
+                    btn.style.backgroundColor = '#e7f1ff';
+                    btn.style.transform = 'translateY(-2px)';
+                    btn.style.boxShadow = '0 4px 12px rgba(11, 94, 215, 0.2)';
+                });
+
+                btn.addEventListener('mouseleave', () => {
+                    if (!btn.disabled) {
+                        btn.style.borderColor = '#dee2e6';
+                        btn.style.backgroundColor = 'white';
+                        btn.style.transform = 'translateY(0)';
+                        btn.style.boxShadow = 'none';
+                    }
+                });
+
+                btn.addEventListener('click', async () => {
+                    const category = btn.getAttribute('data-category');
+
+                    if (!isLeader && !isCategoryTimeActive(category)) {
+                        showMessage(`⏰ ${category} time window is closed (${getCategoryTimeRange(category)})`, 'warning');
+                        return;
+                    }
+
+                    categoryButtons.forEach(b => b.disabled = true);
+
+                    btn.innerHTML = `
+                        <span style="display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(11, 94, 215, 0.3); border-top-color: #0B5ED7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px;"></span>
+                        Selected
+                    `;
+                    btn.style.backgroundColor = '#0B5ED7';
+                    btn.style.borderColor = '#0B5ED7';
+                    btn.style.color = 'white';
+
+                    const hasAttended = await checkIfAlreadyAttended(code, category);
+                    if (hasAttended) {
+                        categoryDiv.remove();
+                        showMessage(`❌ Already attended today for ${category}.`, 'error');
+                        codeInput.value = '';
+                        codeInput.classList.remove('is-valid', 'is-invalid');
+                        currentMember = null;
+                        selectedCategory = null;
+                        return;
+                    }
+
+                    selectedCategory = category;
+
+                    setTimeout(async () => {
+                        categoryDiv.remove();
+                        await submitAttendanceWithCategory(code, category);
+                    }, 500);
+                });
+            });
+        }
+
+        // Submit Attendance with Category
+        async function submitAttendanceWithCategory(code, category) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            buttonText.textContent = 'Processing...';
+
+            try {
+                const result = await submitAttendance(code, category);
+
+                if (result.success) {
+                    showMessage(result.message || `✓ Attendance recorded for ${category}!`, 'success');
+                    codeInput.value = '';
+                    codeInput.classList.remove('is-valid', 'is-invalid');
+
+                    userStatus.textContent = 'Present ✓';
+                    userStatus.classList.add('success');
+
+                    await loadStats();
+                } else {
+                    showMessage(result.error || '❌ Failed to record attendance.', 'error');
+                }
+
+            } catch (error) {
+                showMessage(error.message || 'Connection error. Please try again.', 'error');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                buttonText.textContent = '✓ Submit Attendance';
+                currentMember = null;
+                selectedCategory = null;
+            }
+        }
+
+		// Form Submit Handler
+		form.addEventListener('submit', async (e) => {
+		    e.preventDefault();
+
+		    const code = codeInput.value.trim();
+
+		    if (!isCodeValid(code)) {
+		        showMessage('Invalid code format. Please enter 6 digits.', 'error');
+		        codeInput.focus();
+		        return;
+		    }
+
+		    submitBtn.disabled = true;
+		    submitBtn.classList.add('loading');
+		    buttonText.textContent = 'Loading...';
+		    msg.style.display = 'none';
+
+		    try {
+		        const memberResponse = await fetch(`${API_ENDPOINTS.getMember}/${code}`);
+
+		        if (!memberResponse.ok) {
+		            throw new Error('Member not found');
+		        }
+
+		        currentMember = await memberResponse.json();
+
+		        let categories = [];
+		        if (currentMember.category) {
+		            if (typeof currentMember.category === 'string') {
+		                categories = currentMember.category.split(',').map(cat => cat.trim());
+		            } else if (Array.isArray(currentMember.category)) {
+		                categories = currentMember.category;
+		            }
+		        }
+
+		        submitBtn.classList.remove('loading');
+		        submitBtn.disabled = false;
+		        buttonText.textContent = '✓ Submit Attendance';
+
+		        if (categories.length === 0) {
+		            showMessage('❌ Member has no categories assigned.', 'error');
+		        } else if (categories.length === 1 && isScoutLeader(currentMember)) {
+		            selectedCategory = categories[0];
+		            const hasAttended = await checkIfAlreadyAttended(code, selectedCategory);
+
+		            if (hasAttended) {
+		                showMessage(`❌ Already attended today for ${selectedCategory}.`, 'error');
+		                codeInput.value = '';
+		                codeInput.classList.remove('is-valid', 'is-invalid');
+		            } else {
+		                await submitAttendanceWithCategory(code, selectedCategory);
+		            }
+		        } else {
+		            showCategorySelection(categories, currentMember.fullName, code);
+		        }
+
+		    } catch (error) {
+		        submitBtn.classList.remove('loading');
+		        submitBtn.disabled = false;
+		        buttonText.textContent = '✓ Submit Attendance';
+		        showMessage(error.message || 'Connection error. Please try again.', 'error');
+		    }
+		});
+
+        // Submit Attendance to API
+        async function submitAttendance(code, category = null) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+                const response = await fetch(API_ENDPOINTS.checkIn, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        category: category,
+                        amount: 0,
+                        timestamp: new Date().toISOString()
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        success: true,
+                        message: `✓ Welcome! Attendance recorded for ${category}.`,
+                        data: data
+                    };
+                } else {
+                    const errorText = await response.text();
+                    return {
+                        success: false,
+                        error: errorText || '❌ Failed to record attendance.'
+                    };
+                }
+
+            } catch (error) {
+                console.error('Attendance submission error:', error);
+
+                if (error.name === 'AbortError') {
+                    throw new Error('⏱️ Request timeout.');
+                }
+
+                throw new Error('🔌 Unable to connect to server.');
+            }
+        }
+
+        // Load Statistics
+        async function loadStats() {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(API_ENDPOINTS.getStats, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const records = Array.isArray(data) ? data : (data.records || []);
+
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayRecords = records.filter(r =>
+                        r.dateOfDay && r.dateOfDay === today
+                    );
+
+                    todayCount.textContent = todayRecords.length;
+                } else {
+                    todayCount.textContent = '--';
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+                todayCount.textContent = '--';
+            }
+        }
+
+        // Show Message Function
+        function showMessage(text, type) {
+            msg.className = type;
+
+            let icon = '';
+            if (type === 'success') {
+                icon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>`;
+            } else if (type === 'error') {
+                icon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>`;
+            } else {
+                icon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                </svg>`;
+            }
+
+            msg.innerHTML = `${icon}${text}`;
+            msg.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+       
+        // Initialize Application
+        async function init() {
+
+            updateDate();
+
+            showLoading();
+            const isConnected = await checkConnection();
+            hideLoading();
+
+            if (isConnected) {
+                await loadStats();
+                showMessage('Connected successfully', 'success');
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 3000);
+            } else {
+                showMessage('⚠️ Unable to connect to server at ' + API_BASE_URL, 'warning');
+            }
+
+            codeInput.focus();
+
+            setInterval(checkConnection, 30000);
+            setInterval(() => {
+                if (connectionBadge.classList.contains('online')) {
+                    loadStats();
+                }
+            }, 10000);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        window.addEventListener('online', () => {
+            checkConnection();
+            showMessage('🔄 Connection restored', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            updateConnectionStatus(false);
+            showMessage('⚠️ Connection lost', 'error');
+        });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+
+</html>

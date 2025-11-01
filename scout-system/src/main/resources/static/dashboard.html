@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scout Manager Dashboard - Overview and Statistics">
+    <title>Scout Manager - Dashboard</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="assets/img/sc-ch.webp">
+    <!-- Icons & Fonts -->
+    <link href="assets/icons/material-symbols.css" rel="stylesheet" />
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+
+<body>
+    <div class="d-flex">
+
+
+
+        <!-- Sidebar -->
+        <aside class="sidebar bg-light p-3 d-flex flex-column shadow" style="width: 250px;" role="navigation"
+            aria-label="Main navigation">
+
+            <!-- Logo & Title -->
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="rounded-circle overflow-hidden me-3"
+                    style="width:50px; height:50px; background-image:url('assets/img/lg.webp'); background-size:cover;"
+                    role="img" aria-label="Scout Manager Logo">
+                </div>
+                <h1 class="h5 mb-0" id="displayFullName"></h1>
+
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-column nav nav-pills">
+                <a href="dashboard.html" class="nav-link d-flex align-items-center mb-2 active" aria-current="page">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="members.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">groups</span>
+                    <span>Members</span>
+                </a>
+                <a href="attendance.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">check_circle</span>
+                    <span>Attendance</span>
+                </a>
+                <a href="activities.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">event</span>
+                    <span>Activities</span>
+                </a>
+                <a href="taxes.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">attach_money</span>
+                    <span>Taxes</span>
+                </a>
+                <a href="attendance-qr.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">qr_code_2</span>
+                    <span>QR Attendance</span>
+                </a>
+                <a href="whatsapp.html" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2">chat</span>
+                    <span>WhatsApp</span>
+                </a>
+
+                <a href="signIn.html" id="signOutBtn" class="nav-link d-flex align-items-center mb-2">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">logout</span>
+                    <span id="signOutText">Sign Out</span>
+                    <span id="signOutSpinner" class="spinner-border spinner-border-sm ms-2" role="status"
+                        aria-hidden="true" style="display:none;"></span>
+                </a>
+
+
+
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-fill p-4" role="main">
+            <div class="main-container">
+
+                <!-- Header Section -->
+                <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <h2 class="h2 mb-0">Dashboard Overview</h2>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <div class="date-time-display">
+                            <span class="material-symbols-outlined me-1" aria-hidden="true">calendar_today</span>
+                            <span id="currentDate" class="text-secondary fw-semibold"></span>
+                        </div>
+                        <div class="date-time-display">
+                            <span class="material-symbols-outlined me-1" aria-hidden="true">schedule</span>
+                            <span id="currentTime" class="text-secondary fw-semibold"></span>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Statistics Cards -->
+                <section class="row g-4 mb-4" aria-label="Statistics Overview">
+                    <!-- Total Scouts Card -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="stat-card bg-white p-4 rounded-xl shadow-sm border text-center">
+                            <div class="stat-icon bg-primary-subtle mb-3">
+                                <span class="material-symbols-outlined text-primary" aria-hidden="true">groups</span>
+                            </div>
+                            <h3 class="stat-title">Total Scouts</h3>
+                            <p class="stat-value fw-bold fs-3 text-primary mb-0" id="totalScouts">
+                                <span class="counter" data-target="0">0</span>
+                            </p>
+                        </article>
+                    </div>
+
+                    <!-- Present Today Card -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="stat-card bg-white p-4 rounded-xl shadow-sm border text-center">
+                            <div class="stat-icon bg-success-subtle mb-3">
+                                <span class="material-symbols-outlined text-success"
+                                    aria-hidden="true">check_circle</span>
+                            </div>
+                            <h3 class="stat-title">Present Today</h3>
+                            <p class="stat-value fw-bold fs-3 text-success mb-0" id="presentToday">
+                                <span class="counter" data-target="0">0</span>
+                            </p>
+                        </article>
+                    </div>
+
+                    <!-- Absent Today Card -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="stat-card bg-white p-4 rounded-xl shadow-sm border text-center">
+                            <div class="stat-icon bg-danger-subtle mb-3">
+                                <span class="material-symbols-outlined text-danger" aria-hidden="true">cancel</span>
+                            </div>
+                            <h3 class="stat-title">Absent Today</h3>
+                            <p class="stat-value fw-bold fs-3 text-danger mb-0" id="absentToday">
+                                <span class="counter" data-target="0">0</span>
+                            </p>
+                        </article>
+                    </div>
+
+                    <!-- Upcoming Events Card -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="stat-card bg-white p-4 rounded-xl shadow-sm border text-center">
+                            <div class="stat-icon bg-warning-subtle mb-3">
+                                <span class="material-symbols-outlined text-warning" aria-hidden="true">event</span>
+                            </div>
+                            <h3 class="stat-title">Upcoming Events</h3>
+                            <p class="stat-value fw-bold fs-3 text-warning mb-0" id="upcomingEvents">
+                                <span class="counter" data-target="0">0</span>
+                            </p>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- Featured Image Section -->
+                <section class="image-section" aria-label="Featured Image">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border text-center">
+                        <img src="./assets/img/ph.webp" alt="Scout Group Photo" class="img-fluid rounded"
+                            style="max-width: 100%; height: auto;" loading="lazy">
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+    </div>
+
+
+
+    <!-- Scripts -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+
+</body>
+
+</html>
