@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Church Scout Management System - Secure Registration">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Scout Manager - Register</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="assets/img/sc-ch.webp">
+    <!-- Icons & Fonts -->
+    <link href="assets/icons/material-symbols.css" rel="stylesheet" />
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/register.css">
+</head>
+
+<body class="register-page">
+
+    <!-- Header with Logos -->
+    <header class="container py-2" role="banner">
+        <div class="logo-row">
+            <img src="./assets/img/ch_1.webp" alt="Church Logo Right" class="logo-img" width="80" height="80"
+                loading="eager">
+            <img src="./assets/img/ch.webp" alt="Main Church Logo" class="logo-img logo-center" width="100" height="100"
+                loading="eager">
+            <img src="./assets/img/sc-ch.webp" alt="Scout Church Logo" class="logo-img" width="80" height="80"
+                loading="eager">
+        </div>
+    </header>
+
+    <!-- Main Registration Section -->
+    <main class="register-bg" role="main">
+        <!-- Overlay for background effect -->
+        <div class="overlay"></div>
+
+        <div class="register-wrapper">
+            <!-- Registration Card -->
+            <form id="registerForm" class="register-form" novalidate aria-label="Registration form">
+                <!-- Title -->
+                <h1 class="register-title">Create Account</h1>
+                <p class="register-subtitle">Join the Scout Manager System</p>
+
+                <!-- Profile Image Upload (Required) -->
+                <div class="mb-3">
+                    <label for="profileImage" class="form-label text-center d-block">Profile Image <span class="text-danger">*</span></label>
+                    <div class="image-upload-wrapper">
+                        <div class="image-preview clickable" id="imagePreview" role="button" tabindex="0" aria-label="Click to upload profile image">
+                            <span class="material-symbols-outlined">add_a_photo</span>
+                            <p class="upload-text">Click to Upload</p>
+                        </div>
+                        <input type="file" id="profileImage" class="d-none" accept="image/*" 
+                            required aria-required="true" aria-describedby="imageError">
+                        <button type="button" id="removeImage" class="btn btn-sm btn-outline-danger mt-2" 
+                            style="display:none;">Remove Image</button>
+                    </div>
+                    <small id="imageError" class="error-message text-center d-block" style="display:none;" role="alert">
+                        Profile image is required
+                    </small>
+                </div>
+
+                <!-- Full Name Field -->
+                <div class="mb-3">
+                    <label for="fullName" class="form-label visually-hidden">Full Name</label>
+                    <input type="text" id="fullName" class="form-control" placeholder="Full Name" 
+                        autocomplete="name" required aria-required="true" aria-describedby="fullNameError">
+                    <small id="fullNameError" class="error-message" style="display:none;" role="alert">
+                        Full name is required
+                    </small>
+                </div>
+
+                <!-- Username Field -->
+                <div class="mb-3">
+                    <label for="username" class="form-label visually-hidden">Username</label>
+                    <input type="text" id="username" class="form-control" placeholder="Username" 
+                        autocomplete="username" required aria-required="true" aria-describedby="usernameError">
+                    <small id="usernameError" class="error-message" style="display:none;" role="alert">
+                        Username is required
+                    </small>
+                </div>
+
+                <!-- Password Field -->
+                <div class="mb-3 position-relative">
+                    <label for="password" class="form-label visually-hidden">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Password"
+                        autocomplete="new-password" required aria-required="true" aria-describedby="passwordError">
+                    <button type="button" id="togglePassword" class="password-toggle"
+                        aria-label="Toggle password visibility" tabindex="-1">
+                        <span class="material-symbols-outlined" id="toggleIcon">visibility</span>
+                    </button>
+                    <small id="passwordError" class="error-message" style="display:none;" role="alert">
+                        Password must be at least 6 characters
+                    </small>
+                </div>
+
+                <!-- Confirm Password Field -->
+                <div class="mb-3 position-relative">
+                    <label for="confirmPassword" class="form-label visually-hidden">Confirm Password</label>
+                    <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password"
+                        autocomplete="new-password" required aria-required="true" aria-describedby="confirmPasswordError">
+                    <button type="button" id="toggleConfirmPassword" class="password-toggle"
+                        aria-label="Toggle confirm password visibility" tabindex="-1">
+                        <span class="material-symbols-outlined" id="toggleConfirmIcon">visibility</span>
+                    </button>
+                    <small id="confirmPasswordError" class="error-message" style="display:none;" role="alert">
+                        Passwords do not match
+                    </small>
+                </div>
+
+                <!-- Registration Alert -->
+                <div id="registerAlert" class="alert alert-danger d-none mb-3" role="alert"></div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="registerBtn" class="btn btn-primary w-100 register-btn">
+                    <span id="btnText">Create Account</span>
+                    <span id="spinner" class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"
+                        style="display:none;"></span>
+                </button>
+
+                <!-- Login Link -->
+                <div class="text-center mt-3">
+                    <p class="mb-0">Already have an account? <a href="signIn.html" class="text-decoration-none fw-semibold">Sign In</a></p>
+                </div>
+            </form> 
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-3" role="contentinfo">
+        <p class="text-muted small mb-0">&copy; 2025 Scout Manager. All rights reserved. Powered By Abanoub Wagim</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/register.js"></script>
+
+</body>
+
+</html>

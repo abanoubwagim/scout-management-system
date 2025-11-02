@@ -1,3 +1,8 @@
+// API Configuration
+const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:9090"
+    : `${window.location.origin}`;
+
 // Authentication Check
 window.addEventListener('DOMContentLoaded', () => {
     const loggedInUser = localStorage.getItem('loggedInUser');
@@ -8,25 +13,73 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     displayUserInfo();
+    loadUserProfilePhoto();
+    loadAllMembers();
 });
 
 
 // Display User Information
 function displayUserInfo() {
     const userName = localStorage.getItem('userFullName') || localStorage.getItem('loggedInUser') || 'User';
-
+    
     const displayFullName = document.getElementById('displayFullName');
-    const userInitial = document.getElementById('userInitial');
-
+    
     if (displayFullName) {
         displayFullName.textContent = userName;
     }
+}
 
-    if (userInitial) {
-        userInitial.textContent = userName.charAt(0).toUpperCase();
+// Load User Profile Photo
+async function loadUserProfilePhoto() {
+    const username = localStorage.getItem('loggedInUser');
+    
+    if (!username) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/profile/${username}`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data.profileImage) {
+                // Profile image is base64 encoded
+                const profilePhotoElement = document.getElementById('sidebarProfilePhoto');
+                
+                if (profilePhotoElement) {
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.src = `data:image/jpeg;base64,${data.profileImage}`;
+                    img.alt = 'Profile Photo';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%'; 
+                    
+                    // Clear placeholder and add image
+                    profilePhotoElement.innerHTML = '';
+                    profilePhotoElement.appendChild(img);
+                }
+            }
+        } else {
+            console.warn('Profile photo not found, using default icon');
+        }
+    } catch (error) {
+        console.error('Error loading profile photo:', error);
+        // Keep default icon if error occurs
     }
 }
 
+
+// Display User Information
+function displayUserInfo() {
+    const userName = localStorage.getItem('userFullName') || localStorage.getItem('loggedInUser') || 'User';
+    
+    const displayFullName = document.getElementById('displayFullName');
+    
+    if (displayFullName) {
+        displayFullName.textContent = userName;
+    }
+}
 
 // Essential Page Elements
 const btnAdd = document.getElementById('btnAddMember');

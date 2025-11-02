@@ -1,3 +1,14 @@
+// API Configuration
+const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:9090"
+    : `${window.location.origin}`;
+
+const API_ENDPOINTS = {
+    getLateMembers: `${API_BASE_URL}/attendance/lateToday`,
+    updateTaxAmount: `${API_BASE_URL}/taxes/updateAmount`,
+    getPresentCount: `${API_BASE_URL}/attendance/presentToday`,
+    getLastCheckIn: `${API_BASE_URL}/attendance/lastCheckIn`
+};
 
 // Authentication Check
 window.addEventListener('DOMContentLoaded', () => {
@@ -7,6 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
     displayUserInfo();
+    loadUserProfilePhoto(); 
 });
 
 // Display User Information
@@ -23,17 +35,47 @@ function displayUserInfo() {
     }
 }
 
-// API Configuration
-const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:9090"
-    : `${window.location.origin}`;
 
-const API_ENDPOINTS = {
-    getLateMembers: `${API_BASE_URL}/attendance/lateToday`,
-    updateTaxAmount: `${API_BASE_URL}/taxes/updateAmount`,
-    getPresentCount: `${API_BASE_URL}/attendance/presentToday`,
-    getLastCheckIn: `${API_BASE_URL}/attendance/lastCheckIn`
-};
+
+//Load User Profile Photo
+async function loadUserProfilePhoto() {
+    const username = localStorage.getItem('loggedInUser');
+    
+    if (!username) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/profile/${username}`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data.profileImage) {
+                // Profile image is base64 encoded
+                const profilePhotoElement = document.getElementById('sidebarProfilePhoto');
+                
+                if (profilePhotoElement) {
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.src = `data:image/jpeg;base64,${data.profileImage}`;
+                    img.alt = 'Profile Photo';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%'; // Make it circular
+                    
+                    // Clear placeholder and add image
+                    profilePhotoElement.innerHTML = '';
+                    profilePhotoElement.appendChild(img);
+                }
+            }
+        } else {
+            console.warn('Profile photo not found, using default icon');
+        }
+    } catch (error) {
+        console.error('Error loading profile photo:', error);
+        // Keep default icon if error occurs
+    }
+}
 
 // API Service Class
 class APIService {

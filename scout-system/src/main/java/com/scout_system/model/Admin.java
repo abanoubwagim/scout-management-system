@@ -1,5 +1,4 @@
 package com.scout_system.model;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,11 +9,10 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "admins")
 public class Admin {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
+	
 	@Column(nullable = false)
 	private String fullName;
 	
@@ -25,46 +23,48 @@ public class Admin {
 	private String password;
 	
 	
+	@Column(name = "profile_image", columnDefinition = "BLOB", nullable = true)
+	private byte[] profileImage;
+	
+	
 	public Admin() {}
 	
-
-	public Admin(String fullName, String userName, String password) {
+	
+	public Admin(String fullName, String userName, String password, byte[] profileImage) {
 		this.fullName = fullName;
 		this.userName = userName;
 		this.password = password;
+		this.profileImage = profileImage;
 	}
-
-
+	
 	public Long getId() {
 		return id;
 	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 	public String getFullName() {
 		return fullName;
 	}
-
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
 	}
-
 	public String getUserName() {
 		return userName;
 	}
-
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
-
 	public String getPassword() {
 		return password;
 	}
-
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
+	public byte[] getProfileImage() {
+		return profileImage;
+	}
+	public void setProfileImage(byte[] profileImage) {
+		this.profileImage = profileImage;
+	}
 }

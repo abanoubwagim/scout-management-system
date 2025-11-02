@@ -1,36 +1,80 @@
+// API Configuration
+const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:9090"
+    : `${window.location.origin}`;
+
 // Authentication Check
 window.addEventListener('DOMContentLoaded', () => {
     const loggedInUser = localStorage.getItem('loggedInUser');
-    
+
     if (!loggedInUser) {
         window.location.href = 'signIn.html';
         return;
     }
-    
+
     displayUserInfo();
+    loadUserProfilePhoto();
     loadActivities();
 });
 
 // Display User Information
 function displayUserInfo() {
     const userName = localStorage.getItem('userFullName') || localStorage.getItem('loggedInUser') || 'User';
-    
+
     const displayFullName = document.getElementById('displayFullName');
     const userInitial = document.getElementById('userInitial');
-    
+
     if (displayFullName) {
         displayFullName.textContent = userName;
     }
-    
+
     if (userInitial) {
         userInitial.textContent = userName.charAt(0).toUpperCase();
     }
 }
 
-// API Configuration
-const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:9090/activities"
-    : `${window.location.origin}/activities`;
+
+
+
+//Load User Profile Photo
+async function loadUserProfilePhoto() {
+    const username = localStorage.getItem('loggedInUser');
+
+    if (!username) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/profile/${username}`);
+
+        if (response.ok) {
+            const data = await response.json();
+
+            if (data.profileImage) {
+                // Profile image is base64 encoded
+                const profilePhotoElement = document.getElementById('sidebarProfilePhoto');
+
+                if (profilePhotoElement) {
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.src = `data:image/jpeg;base64,${data.profileImage}`;
+                    img.alt = 'Profile Photo';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%'; // Make it circular
+
+                    // Clear placeholder and add image
+                    profilePhotoElement.innerHTML = '';
+                    profilePhotoElement.appendChild(img);
+                }
+            }
+        } else {
+            console.warn('Profile photo not found, using default icon');
+        }
+    } catch (error) {
+        console.error('Error loading profile photo:', error);
+        // Keep default icon if error occurs
+    }
+}
 
 // Display Current Date
 function updateCurrentDate() {
@@ -49,23 +93,23 @@ updateCurrentDate();
 async function updateStatistics() {
     try {
         const [totalResponse, upcomingResponse, completedResponse] = await Promise.all([
-            fetch(`${API_BASE_URL}/totalActivity`),
-            fetch(`${API_BASE_URL}/upComingActivity`),
-            fetch(`${API_BASE_URL}/completedActivity`)
+            fetch(`${API_BASE_URL}/activities/totalActivity`),
+            fetch(`${API_BASE_URL}/activities/upComingActivity`),
+            fetch(`${API_BASE_URL}/activities/completedActivity`)
         ]);
-        
+
         if (!totalResponse.ok || !upcomingResponse.ok || !completedResponse.ok) {
             throw new Error("Failed to fetch statistics");
         }
-        
+
         const total = await totalResponse.json();
         const upcoming = await upcomingResponse.json();
         const completed = await completedResponse.json();
-        
+
         document.getElementById("totalActivities").textContent = total;
         document.getElementById("upcomingActivities").textContent = upcoming;
         document.getElementById("completedActivities").textContent = completed;
-        
+
     } catch (error) {
         document.getElementById("totalActivities").textContent = 0;
         document.getElementById("upcomingActivities").textContent = 0;
@@ -77,27 +121,27 @@ async function updateStatistics() {
 async function loadActivities() {
     const tbody = document.getElementById('activitiesTableBody');
     const noDataMsg = document.getElementById('noActivitiesMessage');
-    
+
     try {
-        const response = await fetch(`${API_BASE_URL}/allActivities`, {
+        const response = await fetch(`${API_BASE_URL}/activities/allActivities`, {
             method: 'GET',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
             mode: 'cors'
         });
-        
+
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to load activities'}`);
         }
-        
+
         const data = await response.json();
-        
+
         renderActivitiesTable(data);
         await updateStatistics();
-        
+
     } catch (error) {
         let userMessage = 'Failed to load activities. ';
         if (error.message.includes('Failed to fetch')) {
@@ -107,9 +151,9 @@ async function loadActivities() {
         } else {
             userMessage += error.message;
         }
-        
+
         showToast(userMessage, 'error');
-        
+
         if (tbody) tbody.innerHTML = '';
         if (noDataMsg) noDataMsg.classList.remove('d-none');
     }
@@ -119,25 +163,25 @@ async function loadActivities() {
 function renderActivitiesTable(activities) {
     const tbody = document.getElementById("activitiesTableBody");
     const noDataMsg = document.getElementById("noActivitiesMessage");
-    
+
     if (!tbody) return;
-    
+
     tbody.innerHTML = "";
-    
+
     const upcomingActivities = activities.filter(activity => activity.status === 'upcoming');
-    
+
     if (!upcomingActivities || upcomingActivities.length === 0) {
         if (noDataMsg) noDataMsg.classList.remove("d-none");
         return;
     }
-    
+
     if (noDataMsg) noDataMsg.classList.add("d-none");
-    
+
     upcomingActivities.forEach((activity, index) => {
         const tr = document.createElement('tr');
         tr.style.animation = `fadeInUp 0.3s ease ${index * 0.05}s`;
         tr.style.animationFillMode = 'both';
-        
+
         let formattedDate = 'N/A';
         if (activity.date) {
             try {
@@ -154,7 +198,7 @@ function renderActivitiesTable(activities) {
                 formattedDate = activity.date;
             }
         }
-        
+
         tr.innerHTML = `
             <td class="fw-bold">${activity.id || 'N/A'}</td>
             <td>${activity.name || 'N/A'}</td>
@@ -167,7 +211,7 @@ function renderActivitiesTable(activities) {
                 </button>
             </td>
         `;
-        
+
         tbody.appendChild(tr);
     });
 }
@@ -201,7 +245,7 @@ inputs.forEach(input => {
 // Add New Activity
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     let allValid = true;
     inputs.forEach(input => {
         if (input.value.trim() === '') {
@@ -209,17 +253,17 @@ form.addEventListener('submit', async (e) => {
             allValid = false;
         }
     });
-    
+
     if (!allValid) return;
-    
+
     saveBtn.disabled = true;
     const originalHTML = saveBtn.innerHTML;
     saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
-    
+
     const dateInput = document.getElementById('date').value;
     const dateObj = new Date(dateInput);
     const formattedDate = `${String(dateObj.getDate()).padStart(2, '0')}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${dateObj.getFullYear()}`;
-    
+
     const activityData = {
         name: document.getElementById('activityName').value.trim(),
         date: formattedDate,
@@ -227,45 +271,45 @@ form.addEventListener('submit', async (e) => {
         description: document.getElementById('description').value.trim(),
         status: 'upcoming'
     };
-    
+
     try {
-        const response = await fetch(`${API_BASE_URL}/addActivity`, {
+        const response = await fetch(`${API_BASE_URL}/activities/addActivity`, {
             method: "POST",
-            headers: { 
+            headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             },
             body: JSON.stringify(activityData)
         });
-        
+
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Failed to add activity: ${errorText}`);
         }
-        
+
         const result = await response.json();
-        
+
         form.reset();
         inputs.forEach(input => input.classList.remove('is-valid', 'is-invalid'));
         checkFields();
-        
+
         saveBtn.classList.replace("btn-primary", "btn-success");
         saveBtn.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Saved!`;
-        
+
         successAlert.textContent = `✅ Activity "${result.name || 'New Activity'}" added successfully!`;
         successAlert.classList.remove('d-none');
-        
+
         showToast(`Activity "${result.name || 'New Activity'}" added successfully!`, 'success');
-        
+
         await loadActivities();
-        
+
         setTimeout(() => {
             saveBtn.classList.replace("btn-success", "btn-primary");
             saveBtn.innerHTML = originalHTML;
             successAlert.classList.add('d-none');
             saveBtn.disabled = false;
         }, 2000);
-        
+
     } catch (error) {
         showToast(error.message || 'Failed to add activity', 'error');
         saveBtn.innerHTML = originalHTML;
@@ -281,7 +325,7 @@ const removeAlert = document.getElementById('removeAlert');
 activityIdInput.addEventListener('input', () => {
     const value = activityIdInput.value.trim();
     const isValid = /^[0-9]+$/.test(value) && Number(value) > 0;
-    
+
     removeBtn.disabled = !isValid;
     activityIdInput.classList.toggle('is-valid', isValid);
     activityIdInput.classList.toggle('is-invalid', !isValid && value !== '');
@@ -290,16 +334,16 @@ activityIdInput.addEventListener('input', () => {
 removeBtn.addEventListener('click', async () => {
     const activityId = activityIdInput.value.trim();
     if (!activityId) return;
-    
+
     removeBtn.disabled = true;
     const originalHTML = removeBtn.innerHTML;
     removeBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Removing...`;
-    
+
     try {
-        const response = await fetch(`${API_BASE_URL}/delete/${activityId}`, {
+        const response = await fetch(`${API_BASE_URL}/activities/delete/${activityId}`, {
             method: "DELETE"
         });
-        
+
         if (!response.ok) {
             if (response.status === 404) {
                 throw new Error(`Activity with ID ${activityId} not found`);
@@ -307,20 +351,20 @@ removeBtn.addEventListener('click', async () => {
             const errorText = await response.text();
             throw new Error(`Failed to delete activity: ${errorText}`);
         }
-        
+
         removeBtn.classList.replace("btn-danger", "btn-success");
         removeBtn.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Removed!`;
-        
+
         removeAlert.innerHTML = `
             <i class="bi bi-check-circle-fill me-2"></i>
             Activity (ID: ${activityId}) removed successfully!
         `;
         removeAlert.classList.remove('d-none');
-        
+
         showToast(`Activity ID ${activityId} removed!`, 'success');
-        
+
         await loadActivities();
-        
+
         setTimeout(() => {
             removeBtn.classList.replace("btn-success", "btn-danger");
             removeBtn.innerHTML = originalHTML;
@@ -329,7 +373,7 @@ removeBtn.addEventListener('click', async () => {
             removeAlert.classList.add('d-none');
             removeBtn.disabled = false;
         }, 2000);
-        
+
     } catch (error) {
         showToast(error.message, 'error');
         removeBtn.innerHTML = originalHTML;
@@ -342,33 +386,33 @@ removeBtn.addEventListener('click', async () => {
 document.getElementById('activitiesTable').addEventListener('click', async (e) => {
     const finishBtn = e.target.closest('.finish-btn');
     if (!finishBtn) return;
-    
+
     const activityId = finishBtn.dataset.id;
     const row = finishBtn.closest('tr');
     const activityName = row.cells[1].textContent;
-    
+
     finishBtn.disabled = true;
     const originalHTML = finishBtn.innerHTML;
     finishBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>Finishing...`;
-    
+
     try {
-        const response = await fetch(`${API_BASE_URL}/completed/${activityId}`, {
+        const response = await fetch(`${API_BASE_URL}/activities/completed/${activityId}`, {
             method: "POST"
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || "Failed to complete activity");
         }
-        
+
         row.style.transition = 'opacity 0.5s ease';
         row.style.opacity = '0';
-        
+
         setTimeout(async () => {
             await loadActivities();
             showToast(`"${activityName}" marked as completed!`, 'success');
         }, 600);
-        
+
     } catch (error) {
         showToast(error.message, 'error');
         finishBtn.disabled = false;
@@ -381,16 +425,16 @@ const exportPdfBtn = document.getElementById('exportPdfBtn');
 
 exportPdfBtn.addEventListener('click', async () => {
     const { jsPDF } = window.jspdf;
-    
+
     if (!jsPDF) {
         showToast('PDF library not loaded. Please refresh.', 'error');
         return;
     }
-    
+
     exportPdfBtn.disabled = true;
     const originalHTML = exportPdfBtn.innerHTML;
     exportPdfBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Generating...`;
-    
+
     try {
         await generatePDF();
         showToast('PDF exported successfully!', 'success');
@@ -407,24 +451,24 @@ async function generatePDF() {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    
-    const response = await fetch(`${API_BASE_URL}/allActivities`);
+
+    const response = await fetch(`${API_BASE_URL}/activities/allActivities`);
     if (!response.ok) throw new Error('Failed to fetch activities');
     const allData = await response.json();
-    
+
     const data = allData.filter(activity => activity.status === 'upcoming');
-    
+
     if (!data || data.length === 0) {
         throw new Error('No upcoming activities found to export');
     }
-    
+
     let logo = null;
     try {
         logo = await loadImage('assets/img/lg-pdf.png');
     } catch (error) {
         // Logo loading failed silently
     }
-    
+
     if (logo) {
         try {
             const imgWidth = 25;
@@ -436,31 +480,31 @@ async function generatePDF() {
             // Failed to add logo
         }
     }
-    
+
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
     doc.text("Scout Manager", pageWidth / 2, 20, { align: 'center' });
-    
+
     doc.setFontSize(16);
     doc.text("Upcoming Activities Report", pageWidth / 2, 30, { align: 'center' });
-    
+
     const date = new Date().toLocaleDateString('en-GB', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
         timeZone: 'Africa/Cairo'
     });
-    
+
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100);
     doc.text(`Generated: ${date}`, 14, 37);
     doc.text(`Upcoming Activities: ${data.length}`, 14, 42);
-    
+
     doc.setTextColor(0);
     doc.setDrawColor(200);
     doc.line(14, 45, pageWidth - 14, 45);
-    
+
     const tableData = data.map(activity => [
         activity.id || 'N/A',
         activity.name || 'N/A',
@@ -468,7 +512,7 @@ async function generatePDF() {
         activity.location || 'N/A',
         activity.description || 'N/A'
     ]);
-    
+
     doc.autoTable({
         head: [['ID', 'Activity Name', 'Date', 'Location', 'Description']],
         body: tableData,
@@ -498,7 +542,7 @@ async function generatePDF() {
             fillColor: [245, 245, 245]
         }
     });
-    
+
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
@@ -509,12 +553,12 @@ async function generatePDF() {
         doc.text('Scout Manager © 2025', 14, footerY);
         doc.setTextColor(0);
     }
-    
+
     const cairoDate = new Date().toLocaleString('en-GB', { timeZone: 'Africa/Cairo' });
     const [day, month, year] = cairoDate.split(',')[0].split('/');
     const timestamp = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     const filename = `Upcoming_Activities_Report_${timestamp}.pdf`;
-    
+
     doc.save(filename);
 }
 
@@ -530,7 +574,7 @@ function loadImage(src) {
 // Toast Notification
 function showToast(message, type = 'success') {
     let toast = document.getElementById('activitiesToast');
-    
+
     if (!toast) {
         toast = document.createElement('div');
         toast.id = 'activitiesToast';
@@ -543,7 +587,7 @@ function showToast(message, type = 'success') {
         `;
         document.body.appendChild(toast);
     }
-    
+
     if (type === 'success') {
         toast.style.backgroundColor = '#d1e7dd';
         toast.style.color = '#0f5132';
@@ -565,9 +609,9 @@ function showToast(message, type = 'success') {
             <span>${message}</span>
         `;
     }
-    
+
     toast.style.display = 'flex';
-    
+
     setTimeout(() => {
         toast.style.animation = 'slideOutRight 0.3s ease';
         setTimeout(() => { toast.style.display = 'none'; }, 300);
@@ -581,17 +625,17 @@ const signOutSpinner = document.getElementById('signOutSpinner');
 
 signOutBtn.addEventListener('click', async function (e) {
     e.preventDefault();
-    
+
     signOutBtn.classList.add('bg-danger', 'text-white');
     signOutText.textContent = 'Signing out...';
     signOutSpinner.style.display = 'inline-block';
     signOutBtn.style.pointerEvents = 'none';
-    
+
     try {
         const API_AUTH_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
             ? "http://localhost:9090"
             : window.location.origin;
-        
+
         // Call the logout endpoint to invalidate session
         const response = await fetch(`${API_AUTH_URL}/logout`, {
             method: 'POST',
@@ -599,22 +643,22 @@ signOutBtn.addEventListener('click', async function (e) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            credentials: 'include' 
+            credentials: 'include'
         });
-        
+
         if (!response.ok) {
             throw new Error('Logout request failed');
         }
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             // Clear local storage
             localStorage.clear();
-            
+
             // Show success message briefly
             signOutText.textContent = 'Logged out successfully!';
-            
+
             // Redirect to sign-in page
             setTimeout(() => {
                 window.location.href = 'signIn.html';
@@ -622,19 +666,19 @@ signOutBtn.addEventListener('click', async function (e) {
         } else {
             throw new Error(result.error || 'Logout failed');
         }
-        
+
     } catch (error) {
         console.error('Logout error:', error);
-        
+
         // Even if API call fails, clear local storage and redirect
         // This ensures the user can still log out from the frontend
         localStorage.clear();
-        
+
         // Show error toast if the function exists
         if (typeof showToast === 'function') {
             showToast('Session ended. Redirecting...', 'error');
         }
-        
+
         setTimeout(() => {
             window.location.href = 'signIn.html';
         }, 1000);

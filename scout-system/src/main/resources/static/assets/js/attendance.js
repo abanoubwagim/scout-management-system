@@ -1,36 +1,79 @@
+// API Configuration
+const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:9090"
+    : `${window.location.origin}`;
+
+
 // Authentication Check
 window.addEventListener('DOMContentLoaded', () => {
     const loggedInUser = localStorage.getItem('loggedInUser');
-    
+
     if (!loggedInUser) {
         window.location.href = 'signIn.html';
         return;
     }
-    
+
     displayUserInfo();
+    loadUserProfilePhoto();
     fetchTodayAttendance();
 });
 
 // Display User Information
 function displayUserInfo() {
     const userName = localStorage.getItem('userFullName') || localStorage.getItem('loggedInUser') || 'User';
-    
+
     const displayFullName = document.getElementById('displayFullName');
     const userInitial = document.getElementById('userInitial');
-    
+
     if (displayFullName) {
         displayFullName.textContent = userName;
     }
-    
+
     if (userInitial) {
         userInitial.textContent = userName.charAt(0).toUpperCase();
     }
 }
 
-// API Configuration
-const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:9090"
-    : `${window.location.origin}`;
+
+// Load User Profile Photo
+async function loadUserProfilePhoto() {
+    const username = localStorage.getItem('loggedInUser');
+
+    if (!username) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/profile/${username}`);
+
+        if (response.ok) {
+            const data = await response.json();
+
+            if (data.profileImage) {
+                // Profile image is base64 encoded
+                const profilePhotoElement = document.getElementById('sidebarProfilePhoto');
+
+                if (profilePhotoElement) {
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.src = `data:image/jpeg;base64,${data.profileImage}`;
+                    img.alt = 'Profile Photo';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%'; // Make it circular
+
+                    // Clear placeholder and add image
+                    profilePhotoElement.innerHTML = '';
+                    profilePhotoElement.appendChild(img);
+                }
+            }
+        } else {
+            console.warn('Profile photo not found, using default icon');
+        }
+    } catch (error) {
+        console.error('Error loading profile photo:', error);
+        // Keep default icon if error occurs
+    }
+}
 
 // API Endpoints for Categories
 const API_ENDPOINTS = {
@@ -44,17 +87,17 @@ const API_ENDPOINTS = {
 async function fetchTodayAttendance() {
     try {
         const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.ALL_TODAY}`);
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch attendance data');
         }
-        
+
         const attendances = await response.json();
-        
+
         populateAttendanceTable(attendances);
         updateStatistics();
         checkTableData();
-        
+
     } catch (error) {
         console.error('Error fetching attendance:', error);
         showNoResults(true);
@@ -66,21 +109,21 @@ async function fetchTodayAttendance() {
 function populateAttendanceTable(attendances) {
     const tbody = document.querySelector('#attendanceTable tbody');
     tbody.innerHTML = '';
-    
+
     if (attendances.length === 0) {
         showNoResults(true);
         document.querySelector('#noDataMessage p').textContent = 'No attendance records for today';
         return;
     }
-    
+
     attendances.forEach(attendance => {
         const row = document.createElement('tr');
         row.style.cursor = 'pointer';
-        
+
         const date = formatDate(attendance.dateOfDay);
         const categoryBadge = getCategoryBadge(attendance.category);
         const statusPill = getStatusPill(attendance.status);
-        
+
         row.innerHTML = `
             <td>${date}</td>
             <td>${attendance.memberCode}</td>
@@ -88,15 +131,15 @@ function populateAttendanceTable(attendances) {
             <td>${categoryBadge}</td>
             <td>${statusPill}</td>
         `;
-        
-        row.addEventListener('click', function() {
+
+        row.addEventListener('click', function () {
             document.querySelectorAll('#attendanceTable tbody tr').forEach(r => r.classList.remove('table-active'));
             this.classList.add('table-active');
         });
-        
+
         tbody.appendChild(row);
     });
-    
+
     showNoResults(false);
     animateTableRows();
 }
@@ -108,7 +151,7 @@ function getCategoryBadge(category) {
         'Cubs and Blossoms': 'category-leader',
         'Buds': 'category-volunteer'
     };
-    
+
     const badgeClass = categoryMap[category] || 'category-scout';
     return `<span class="category-badge ${badgeClass}">${category}</span>`;
 }
@@ -122,11 +165,11 @@ function getStatusPill(status) {
 // Format Date
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
-    
+
     try {
         const [year, month, day] = dateString.split('-');
         const date = new Date(year, month - 1, day);
-        
+
         return date.toLocaleDateString('en-GB', {
             day: '2-digit',
             month: 'short',
@@ -296,7 +339,7 @@ exportBudsBtn.addEventListener('click', async () => {
 async function fetchCategoryData(category) {
     try {
         let endpoint;
-        switch(category) {
+        switch (category) {
             case 'scouts-and-guides':
                 endpoint = API_ENDPOINTS.SCOUTS_GUIDES;
                 break;
@@ -311,7 +354,7 @@ async function fetchCategoryData(category) {
         }
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`);
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch category data');
         }
@@ -326,11 +369,11 @@ async function fetchCategoryData(category) {
 // Export Category PDF
 async function exportCategoryPDF(category, categoryName) {
     const button = category === 'scouts-and-guides' ? exportScoutsGuidesBtn :
-                  category === 'cubs-and-blossoms' ? exportCubsBtn : exportBudsBtn;
-    
+        category === 'cubs-and-blossoms' ? exportCubsBtn : exportBudsBtn;
+
     // Store original HTML BEFORE any changes
     const originalHTML = button.innerHTML;
-    
+
     try {
         button.disabled = true;
         button.innerHTML = `
@@ -357,7 +400,7 @@ async function exportCategoryPDF(category, categoryName) {
     } catch (error) {
         console.error('Category PDF Export Error:', error);
         showToast(`No data available for ${categoryName}`, 'error');
-        
+
         // Restore button to original state
         button.innerHTML = originalHTML;
         button.disabled = false;
@@ -481,7 +524,7 @@ async function generatePDF() {
 async function generateCategoryPDF(data, categoryName, categoryType) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF("p", "pt", "a4");
-    
+
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
@@ -505,32 +548,32 @@ async function generateCategoryPDF(data, categoryName, categoryType) {
     // Determine category color
     let categoryColor = [13, 110, 253];
     if (categoryType === 'scouts-and-guides') {
-        categoryColor = [13, 110, 253]; 
+        categoryColor = [13, 110, 253];
     } else if (categoryType === 'cubs-and-blossoms') {
-        categoryColor = [255, 193, 7]; 
+        categoryColor = [255, 193, 7];
     } else if (categoryType === 'buds') {
-        categoryColor = [25, 135, 84]; 
+        categoryColor = [25, 135, 84];
     }
 
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
     doc.text("Scout Manager", pageWidth / 2, 40, { align: "center" });
-    
+
     doc.setFontSize(16);
     doc.text(`${categoryName} - Attendance Report`, pageWidth / 2, 60, { align: "center" });
-    
+
     const date = new Date().toLocaleDateString("en-GB", {
         day: '2-digit',
         month: 'short',
         year: 'numeric'
     });
-    
+
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100);
-    doc.text(`Generated: ${date}     Category: ${categoryName}     Records: ${data.length}`, 
+    doc.text(`Generated: ${date}     Category: ${categoryName}     Records: ${data.length}`,
         pageWidth / 2, 75, { align: "center" });
-    
+
     doc.setTextColor(0);
     doc.setDrawColor(200);
     doc.line(40, 85, pageWidth - 40, 85);
@@ -546,9 +589,9 @@ async function generateCategoryPDF(data, categoryName, categoryType) {
         const fullName = item.name || item.fullName || 'N/A';
         const category = item.category || 'N/A';
         const status = item.status || 'N/A';
-        
+
         const dateFormatted = formatDateForPDF(dateValue);
-        
+
         if (status.toLowerCase() === 'present') presentCount++;
         if (status.toLowerCase() === 'absent') absentCount++;
 
@@ -565,17 +608,17 @@ async function generateCategoryPDF(data, categoryName, categoryType) {
     doc.setFontSize(9);
     const headers = ['Date', 'Code', 'Name', 'Category', 'Status'];
     let x = startX;
-    
+
     headers.forEach((header, j) => {
         doc.setFillColor(...categoryColor);
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
-        
+
         doc.rect(x, y, colWidths[j], rowHeight, 'F');
         doc.text(header, x + colWidths[j] / 2, y + rowHeight / 2 + 3, { align: "center" });
         x += colWidths[j];
     });
-    
+
     y += rowHeight;
 
     // Draw rows
@@ -593,7 +636,7 @@ async function generateCategoryPDF(data, categoryName, categoryType) {
 
         row.forEach((cell, j) => {
             doc.rect(x, y, colWidths[j], rowHeight, 'S');
-            
+
             if (j === 4) { // Status column
                 const cellLower = String(cell).toLowerCase();
                 if (cellLower === 'present') {
@@ -604,15 +647,15 @@ async function generateCategoryPDF(data, categoryName, categoryType) {
                     doc.setFont('helvetica', 'bold');
                 }
             }
-            
+
             const cellText = String(cell);
             doc.text(cellText, x + colWidths[j] / 2, y + rowHeight / 2 + 3, { align: "center" });
-            
+
             if (j === 4) {
                 doc.setTextColor(0, 0, 0);
                 doc.setFont('helvetica', 'normal');
             }
-            
+
             x += colWidths[j];
         });
 
@@ -624,17 +667,17 @@ async function generateCategoryPDF(data, categoryName, categoryType) {
         doc.addPage();
         y = 40;
     }
-    
+
     const finalY = y + 20;
     doc.setFillColor(209, 244, 221);
     doc.setDrawColor(25, 135, 84);
     doc.roundedRect((pageWidth - 300) / 2, finalY, 300, 50, 3, 3, 'FD');
-    
+
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(25, 135, 84);
     doc.text(`Total: ${data.length}`, pageWidth / 2, finalY + 18, { align: 'center' });
-    
+
     doc.setFontSize(10);
     doc.text(`Present: ${presentCount}  |  Absent: ${absentCount}`, pageWidth / 2, finalY + 36, { align: 'center' });
 
@@ -657,7 +700,7 @@ async function generateCategoryPDF(data, categoryName, categoryType) {
 function formatDateForPDF(dateString) {
     try {
         if (!dateString) return 'N/A';
-        
+
         if (typeof dateString === 'string' && dateString.includes('-')) {
             const parts = dateString.split('-');
             if (parts.length === 3 && parts[0].length === 4) {
@@ -669,7 +712,7 @@ function formatDateForPDF(dateString) {
                 });
             }
         }
-        
+
         return dateString.toString();
     } catch {
         return dateString;
@@ -752,51 +795,51 @@ const signOutSpinner = document.getElementById('signOutSpinner');
 
 signOutBtn.addEventListener('click', async function (e) {
     e.preventDefault();
-    
+
     signOutBtn.classList.add('bg-danger', 'text-white');
     signOutText.textContent = 'Signing out...';
     signOutSpinner.style.display = 'inline-block';
     signOutBtn.style.pointerEvents = 'none';
-    
+
     try {
         const API_AUTH_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
             ? "http://localhost:9090"
             : window.location.origin;
-        
+
         const response = await fetch(`${API_AUTH_URL}/logout`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            credentials: 'include' 
+            credentials: 'include'
         });
-        
+
         if (!response.ok) {
             throw new Error('Logout request failed');
         }
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             localStorage.clear();
             signOutText.textContent = 'Logged out successfully!';
-            
+
             setTimeout(() => {
                 window.location.href = 'signIn.html';
             }, 500);
         } else {
             throw new Error(result.error || 'Logout failed');
         }
-        
+
     } catch (error) {
         console.error('Sign out error:', error);
         localStorage.clear();
-        
+
         if (typeof showToast === 'function') {
             showToast('Session ended. Redirecting...', 'error');
         }
-        
+
         setTimeout(() => {
             window.location.href = 'signIn.html';
         }, 1000);

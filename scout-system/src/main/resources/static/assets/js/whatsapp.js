@@ -10,8 +10,9 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
     displayUserInfo();
+    loadUserProfilePhoto(); 
     loadPendingMembers();
-    loadTotalMessagesSent(); // Load total messages sent count
+    loadTotalMessagesSent();
 });
 
 // Display user info
@@ -20,6 +21,47 @@ function displayUserInfo() {
     const displayFullName = document.getElementById('displayFullName');
     if (displayFullName) {
         displayFullName.textContent = userName;
+    }
+}
+
+
+// ADDED - Load User Profile Photo
+async function loadUserProfilePhoto() {
+    const username = localStorage.getItem('loggedInUser');
+    
+    if (!username) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/admin/profile/${username}`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data.profileImage) {
+                // Profile image is base64 encoded
+                const profilePhotoElement = document.getElementById('sidebarProfilePhoto');
+                
+                if (profilePhotoElement) {
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.src = `data:image/jpeg;base64,${data.profileImage}`;
+                    img.alt = 'Profile Photo';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%'; 
+                    
+                    // Clear placeholder and add image
+                    profilePhotoElement.innerHTML = '';
+                    profilePhotoElement.appendChild(img);
+                }
+            }
+        } else {
+            console.warn('Profile photo not found, using default icon');
+        }
+    } catch (error) {
+        console.error('Error loading profile photo:', error);
+        // Keep default icon if error occurs
     }
 }
 
