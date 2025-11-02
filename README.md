@@ -5,7 +5,6 @@
 ![Scout Management System](https://img.shields.io/badge/Scout-Management-blue?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=java)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=for-the-badge&logo=spring)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
 **A complete web-based system for managing scout organizations - members, attendance, activities, and WhatsApp communications.**
 
@@ -30,7 +29,6 @@
   - [WhatsApp Integration](#-whatsapp-integration)
 - [Screenshots](#-screenshots)
 - [Contributing](#-contributing)
-- [License](#-license)
 - [Support](#-support)
 
 ---
@@ -110,17 +108,22 @@
 │   │   ├── TaxController.java
 │   │   ├── ActivityController.java
 │   │   ├── WhatsAppController.java
-│   │   └── AuthController.java
+│   │   └── AdminController.java
 │   │
-│   ├── 📂 service/            # Business Logic (7 services)
+│   ├── 📂 service/            # Business Logic (7 services   
 │   │   ├── MemberService.java
 │   │   ├── AttendanceService.java
 │   │   ├── TaxService.java
 │   │   ├── ActivityService.java
-│   │   ├── WhatsAppService.java
-│   │   ├── BackupService.java
-│   │   └── AuthService.java
-│   │
+│   │   ├── WhatsAppSchedulerService.java
+│   │   └── AdminService.java
+|   |   └── DataCleanupScheduler.java
+│   │   └── 📂 impl/
+│   │           ├── MemberServiceImpl.java
+│   │           ├── AttendanceServiceImpl.java
+│   │           ├── TaxServiceImpl.java
+│   │           ├── ActivityServiceImpl.java
+|   |           └── AdminServiceImpl.java
 │   ├── 📂 repository/         # JPA Repositories (5 files)
 │   │   ├── MemberRepository.java
 │   │   ├── AttendanceRepository.java
@@ -135,34 +138,36 @@
 │   │   ├── Activity.java
 │   │   └── Admin.java
 │   │
-│   ├── 📂 config/             # Configuration
+│   ├── 📂 util/             # Configuration
 │   │   ├── SecurityConfig.java
-│   │   └── WebConfig.java
+│   │   ├── DatabaseBackup.java
+│   │   ├── LocalDateAttributeConverter.java
+│   │   └── SQLiteConfig.java
 │   │
 │   └── 📄 ScoutSystemApplication.java
 │
 ├── 📂 src/main/resources/
 │   ├── 📄 application.properties
+│   ├── 📄 logback-spring.xml
 │   └── 📂 static/
 │       ├── 📂 assets/
 │       │   ├── 📂 css/        # Stylesheets
 │       │   ├── 📂 img/        # Images & logos
-│       │   └── 📂 js/         # JavaScript modules (9 files)
-│       └── 📂 pages/          # HTML pages (8 pages)
-│           ├── signIn.html
+│       │   ├── 📂 js/         # JavaScript modules (9 files)
+│       │   ├── 📂 fonts/         # Fonts 
+│       │   ├── 📂 icons/         # Icons
+│       └── ├── signIn.html    # HTML pages (8 pages)
 │           ├── register.html
 │           ├── dashboard.html
 │           ├── members.html
 │           ├── attendance.html
+│           ├── attendance-qr.html
+│           ├── qr-checkin.html
 │           ├── activities.html
-│           ├── reports.html
-│           └── settings.html
+│           ├── whatsapp.html
+│           └── taxes.html
 │
-├── 📂 database/
-│   └── 📄 scout_system.db     # SQLite database
-│
-├── 📂 whatsapp-session/       # Chrome profile data
-│
+└── 📄 scout_system.db     # SQLite database  
 ├── 📄 pom.xml                 # Maven dependencies
 ├── 📄 .gitignore
 └── 📄 README.md
@@ -540,7 +545,7 @@ GET /whatsapp/totalMessageSent
 
 ## 📸 Screenshots
 
-> *Coming soon - Add screenshots of your application here*
+> *Coming soon*
 
 ---
 
