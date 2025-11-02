@@ -543,9 +543,21 @@ GET /whatsapp/totalMessageSent
 
 ---
 
-## 📸 Screenshots
+## 📸 UI & UX
 
-> *Coming soon*
+ ![register](https://github.com/user-attachments/assets/cf386a53-5c28-4551-a477-2e9e63e9181a)
+<img width="1366" height="599" alt="signIn" src="https://github.com/user-attachments/assets/8cf7c161-6023-4e6b-9a6c-52356cdfe291" />
+<img width="1366" height="599" alt="dashboard" src="https://github.com/user-attachments/assets/42a6050b-fe09-4a3c-bb7c-50baa260935f" />
+<img width="1366" height="599" alt="Members" src="https://github.com/user-attachments/assets/100aa535-2f36-4ed6-b0e2-37eefb9033f8" />
+<img width="1366" height="599" alt="Edit - Members" src="https://github.com/user-attachments/assets/6db9ca42-da65-4b10-b07e-8550b053b0fd" />
+<img width="1366" height="599" alt="Delete - Members" src="https://github.com/user-attachments/assets/8bc573a1-cbe3-48a2-bf83-d1be9ff27276" />
+<img width="1366" height="599" alt="Attend - Members" src="https://github.com/user-attachments/assets/62bfafc5-e777-447e-964e-f1a1a00cbee1" />
+<img width="1366" height="599" alt="profile Members - Members" src="https://github.com/user-attachments/assets/1e32a94d-1569-4ff8-ad33-1b0fbd46a047" />
+<img width="1366" height="599" alt="Attendance" src="https://github.com/user-attachments/assets/0d30405b-bd40-4804-a115-322ec1570be6" />
+<img width="1366" height="660" alt="taxes" src="https://github.com/user-attachments/assets/ca3e6434-5f56-467a-b400-897b356889fb" />
+<img width="1366" height="1098" alt="Activities" src="https://github.com/user-attachments/assets/4901dd1b-8cea-4d25-af2e-0fa58152a6d0" />
+<img width="1366" height="720" alt="QR Attendance" src="https://github.com/user-attachments/assets/c8e8f509-6136-444b-9c2a-e9d50f8a7ca3" />
+<img width="1366" height="944" alt="Whatsapp" src="https://github.com/user-attachments/assets/8378e34a-3a40-4a35-90a9-0b1384091e31" />
 
 ---
 
