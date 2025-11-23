@@ -5,12 +5,18 @@
 ![Scout Management System](https://img.shields.io/badge/Scout-Management-blue?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=java)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=for-the-badge&logo=spring)
+![Version](https://img.shields.io/badge/Backend-v1.0-red?style=for-the-badge)
 
 **A complete web-based system for managing scout organizations - members, attendance, activities, and WhatsApp communications.**
 
 [Features](#-features) • [Quick Start](#-quick-start) • [API Documentation](#-api-documentation) • [Tech Stack](#-technology-stack)
 
 </div>
+
+---
+
+> **🚀 New Backend Version Will be Available!**  
+> We're continuously improving the codebase. A newer version of the backend is currently under development with enhanced features, improved performance, and better code organization. Stay tuned for updates!
 
 ---
 
@@ -561,6 +567,24 @@ GET /whatsapp/totalMessageSent
 
 ---
 
+## 🔄 Version History & Roadmap
+
+### Current Version (v1.0)
+This README documents the stable release version currently available in the repository.
+
+### Upcoming Version (v2.0) - In Development
+We're actively working on an improved backend with:
+- 🔧 Enhanced code architecture and organization
+- ⚡ Performance optimizations
+- 🛡️ Improved security features
+- 🐛 Bug fixes and stability improvements
+- 📊 Additional reporting capabilities
+- 📝 Improved JavaScript codebase
+
+**Note:** The new version maintains backward compatibility with existing data and configurations. Migration guides will be provided upon release.
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow these steps:
@@ -586,9 +610,7 @@ For issues, questions, or feature requests:
 ## 🙏 Acknowledgments
 
 - Built with ❤️ for **Mar-Mina Scouts** in Egypt
-- Thanks to all contributors and the scout community
-- Special thanks to the Spring Boot and Bootstrap communities
-
+  
 ---
 
 ## 🌟 Star History
