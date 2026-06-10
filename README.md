@@ -1,630 +1,182 @@
-# 🎯 Scout Management System
+# Scout System
 
-<div align="center">
+Backend API for managing the scout group at Mar Mena Church. It covers member registration, attendance tracking, late-fee calculations, activity scheduling, and WhatsApp notifications.
 
-![Scout Management System](https://img.shields.io/badge/Scout-Management-blue?style=for-the-badge)
-![Java](https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=java)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=for-the-badge&logo=spring)
-![Version](https://img.shields.io/badge/Backend-v1.0-red?style=for-the-badge)
-
-**A complete web-based system for managing scout organizations - members, attendance, activities, and WhatsApp communications.**
-
-[Features](#-features) • [Quick Start](#-quick-start) • [API Documentation](#-api-documentation) • [Tech Stack](#-technology-stack)
-
-</div>
+The frontend was built by a colleague based on the languages and requirements the frontend team specified. 
 
 ---
 
-> **🚀 New Backend Version Will be Available!**  
-> We're continuously improving the codebase. A newer version of the backend is currently under development with enhanced features, improved performance, and better code organization. Stay tuned for updates!
+## Tech Stack
+
+- Java 17 / Spring Boot
+- SQLite (WAL mode enabled)
+- Spring Security with BCrypt
+- Selenium WebDriver (WhatsApp Web automation)
+- Spring Scheduling
 
 ---
 
-## 📋 Table of Contents
+## Features
 
-- [Features](#-features)
-- [Technology Stack](#-technology-stack)
-- [Project Structure](#-project-structure)
-- [Quick Start](#-quick-start)
-- [Configuration](#-configuration)
-- [API Documentation](#-api-documentation)
-  - [Member Management](#-member-management)
-  - [Attendance System](#-attendance-management)
-  - [Financial Tracking](#-tax-management)
-  - [Activity Management](#-activity-management)
-  - [WhatsApp Integration](#-whatsapp-integration)
-- [Screenshots](#-screenshots)
-- [Contributing](#-contributing)
-- [Support](#-support)
+### Members
 
----
+Each member has a unique 6-character code and belongs to one of three categories: Scouts and Guides, Cubs and Blossoms, or Buds. Members with the title "Scout Leader" are excluded from late fees and do not appear in daily attendance counts.
 
-## ✨ Features
+### Attendance
 
-### 👥 Member Management
-- ✅ Add, edit, delete, and search scout members
-- ✅ Auto-generated member codes (YYMMDD format)
-- ✅ Categorization by age groups
-- ✅ Phone and address validation
-- ✅ Export member lists to PDF
+Members check in per category and session. The system records the check-in time and compares it against the cutoff for that category:
 
-### 📸 QR Attendance System
-- ✅ Scan QR codes to mark attendance
-- ✅ Automatic late detection with configurable time windows
-- ✅ Real-time attendance tracking
-- ✅ Daily attendance reports
-- ✅ Category-based attendance filtering
+| Category          | Cutoff   |
+|-------------------|----------|
+| Scouts and Guides | 12:10 PM |
+| Cubs and Blossoms | 12:10 PM |
+| Buds              | 11:40 AM |
 
-### 💰 Financial Tracking
-- ✅ Automatic late fee calculation
-- ✅ Daily and monthly revenue reports
-- ✅ Tax amount customization
-- ✅ Financial export to PDF
-- ✅ Revenue analytics
+If a member checks in after the cutoff, a tax record is created automatically. Scout Leaders are always exempt.
 
-### 🎯 Activity Management
-- ✅ Create and manage scout activities and events
-- ✅ Activity status tracking (upcoming/completed)
-- ✅ Location and description details
-- ✅ Activity statistics dashboard
+### Taxes (Late Fees)
 
-### 📱 WhatsApp Integration
-- ✅ Automated message sending to members
-- ✅ Bulk messaging capabilities
-- ✅ Message tracking and status
-- ✅ Selenium-based WhatsApp Web automation
+Each late check-in creates a tax entry linked to that attendance record. Amounts can be adjusted manually after the fact. The system tracks daily totals, monthly totals, and total revenue over time.
 
-### 📄 Reporting & Export
-- ✅ PDF generation for all reports
-- ✅ Member lists with filters
-- ✅ Attendance summaries
-- ✅ Financial statements
+### Activities
 
-### 🔒 Additional Features
-- ✅ Admin authentication system
-- ✅ Database backup functionality
-- ✅ Offline operation support
-- ✅ Mobile hotspot compatibility
-- ✅ RESTful API architecture
+Activities have a name, date, location, description, and status (upcoming or completed). Status is updated manually via the API.
+
+### WhatsApp Notifications
+
+Uses Selenium WebDriver to automate WhatsApp Web and send messages to members who have not been notified yet. An `is_sent` flag on each member record prevents duplicate sends. You can trigger sends per member or run a bulk send for all pending members.
+
+### Admin Authentication
+
+Session-based login with BCrypt password hashing. Admins can upload a profile image (stored as a blob in the database).
+
+### Scheduled Cleanup
+
+Attendance and tax records older than 6 months are deleted automatically every Friday at 11 AM Cairo time. The same check also runs on application startup. A manual trigger endpoint is available if needed.
+
+### Database Backup
+
+A single API call creates a timestamped copy of the SQLite file under `backups/`.
 
 ---
 
-## 🛠 Technology Stack
+## Prerequisites
 
-| Category | Technology |
-|----------|-----------|
-| **Backend** | Java 17, Spring Boot 3.x |
-| **Database** | SQLite |
-| **Frontend** | Bootstrap 5.3, HTML5, CSS3, JavaScript |
-| **Automation** | Selenium WebDriver |
-| **PDF Generation** | jsPDF |
-| **Build Tool** | Maven |
+- Java 17+
+- Maven
+- Google Chrome + ChromeDriver
+  - The driver path is currently set to `C:\chromedriver\chromedriver.exe` in `ScoutSystemApplication.java`. Update this if your setup differs.
 
 ---
 
-## 📂 Project Structure
+## Getting Started
 
-```
-📦 scout-system
-│
-├── 📂 src/main/java/com/scout_system/
-│   ├── 📂 controller/         # REST API Controllers (6 files)
-│   │   ├── MemberController.java
-│   │   ├── AttendanceController.java
-│   │   ├── TaxController.java
-│   │   ├── ActivityController.java
-│   │   ├── WhatsAppController.java
-│   │   └── AdminController.java
-│   │
-│   ├── 📂 service/            # Business Logic (7 services   
-│   │   ├── MemberService.java
-│   │   ├── AttendanceService.java
-│   │   ├── TaxService.java
-│   │   ├── ActivityService.java
-│   │   ├── WhatsAppSchedulerService.java
-│   │   └── AdminService.java
-|   |   └── DataCleanupScheduler.java
-│   │   └── 📂 impl/
-│   │           ├── MemberServiceImpl.java
-│   │           ├── AttendanceServiceImpl.java
-│   │           ├── TaxServiceImpl.java
-│   │           ├── ActivityServiceImpl.java
-|   |           └── AdminServiceImpl.java
-│   ├── 📂 repository/         # JPA Repositories (5 files)
-│   │   ├── MemberRepository.java
-│   │   ├── AttendanceRepository.java
-│   │   ├── TaxRepository.java
-│   │   ├── ActivityRepository.java
-│   │   └── AdminRepository.java
-│   │
-│   ├── 📂 model/              # Entity Models (5 entities)
-│   │   ├── Member.java
-│   │   ├── Attendance.java
-│   │   ├── Tax.java
-│   │   ├── Activity.java
-│   │   └── Admin.java
-│   │
-│   ├── 📂 util/             # Configuration
-│   │   ├── SecurityConfig.java
-│   │   ├── DatabaseBackup.java
-│   │   ├── LocalDateAttributeConverter.java
-│   │   └── SQLiteConfig.java
-│   │
-│   └── 📄 ScoutSystemApplication.java
-│
-├── 📂 src/main/resources/
-│   ├── 📄 application.properties
-│   ├── 📄 logback-spring.xml
-│   └── 📂 static/
-│       ├── 📂 assets/
-│       │   ├── 📂 css/        # Stylesheets
-│       │   ├── 📂 img/        # Images & logos
-│       │   ├── 📂 js/         # JavaScript modules (9 files)
-│       │   ├── 📂 fonts/         # Fonts 
-│       │   ├── 📂 icons/         # Icons
-│       └── ├── signIn.html    # HTML pages (8 pages)
-│           ├── register.html
-│           ├── dashboard.html
-│           ├── members.html
-│           ├── attendance.html
-│           ├── attendance-qr.html
-│           ├── qr-checkin.html
-│           ├── activities.html
-│           ├── whatsapp.html
-│           └── taxes.html
-│
-└── 📄 scout_system.db     # SQLite database  
-├── 📄 pom.xml                 # Maven dependencies
-├── 📄 .gitignore
-└── 📄 README.md
-```
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Java 17** or higher
-- **Maven 3.6+**
-- **Google Chrome** (for WhatsApp integration)
-- **ChromeDriver** (compatible with your Chrome version)
-
-### Installation
-
-1. **Clone the repository**
 ```bash
 git clone https://github.com/abanoubwagim/scout-management-system.git
 cd scout-management-system
+./mvnw spring-boot:run
 ```
 
-2. **Build the project**
-```bash
-mvn clean package
-```
-
-3. **Run the application**
-```bash
-java -jar target/scout-management-system-1.0.0.jar
-```
-
-4. **Access the application**
-
-Open your browser and navigate to:
-```
-http://localhost:9090/signIn.html
-```
-
-5. **Login with default credentials**
-```
-Username: admin
-Password: admin123
-```
-
-### First-Time Setup
-
-1. Register a new admin account at `http://localhost:9090/register.html`
-2. Login with your new credentials
-3. Start adding scout members
-4. Configure WhatsApp session (first-time QR scan required)
+The app starts on port 9090. SQLite creates `scout-system.db` automatically on first run.
 
 ---
 
-## ⚙️ Configuration
+## API Reference
 
-Edit `src/main/resources/application.properties`:
+A Postman collection is available at `docs/Scout System API.postman.json`.
 
-```properties
-# Server Configuration
-server.port=9090
+### Members
 
-# Database Configuration
-spring.datasource.url=jdbc:sqlite:database/scout_system.db
-spring.datasource.driver-class-name=org.sqlite.JDBC
-spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect
+| Method | Endpoint                                     | Description                                     |
+|--------|----------------------------------------------|-------------------------------------------------|
+| POST   | `/members/addMember`                         | Register a new member                           |
+| GET    | `/members/allMembers`                        | List all members                                |
+| GET    | `/members/member/{code}`                     | Get member by code                              |
+| PUT    | `/members/update/{code}`                     | Update member                                   |
+| DELETE | `/members/delete/{code}`                     | Delete member                                   |
+| GET    | `/members/getCountAllMember`                 | Total member count                              |
+| POST   | `/members/attend`                            | Mark attendance with optional manual tax amount |
+| GET    | `/members/checkAttendance/{code}/{category}` | Check if member attended today                  |
+| GET    | `/members/not-sent`                          | Members with unsent WhatsApp messages           |
+| PUT    | `/members/{code}/mark-sent`                  | Mark member as notified                         |
+| GET    | `/members/backup`                            | Trigger a database backup                       |
 
-# JPA Configuration
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=false
+### Attendance
 
-# WhatsApp Configuration
-whatsapp.session.path=C:/whatsapp-session
-whatsapp.chrome.driver.path=chromedriver.exe
-```
+| Method | Endpoint                                        | Description                                |
+|--------|-------------------------------------------------|--------------------------------------------|
+| POST   | `/attendance/attend`                            | Mark attendance (automatic late-fee logic) |
+| GET    | `/attendance/allAttendancePerToday`             | All attendance records for today           |
+| GET    | `/attendance/presentToday`                      | Present count today                        |
+| GET    | `/attendance/absentToday`                       | Absent count today                         |
+| GET    | `/attendance/lateToday`                         | Late members today                         |
+| GET    | `/attendance/lastCheckIn`                       | Last check-in time today                   |
+| GET    | `/attendance/checkAttendance/{code}/{category}` | Check attendance status for a member       |
+| GET    | `/attendance/scouts-and-guides`                 | Today's Scouts and Guides records          |
+| GET    | `/attendance/cubs-and-blossoms`                 | Today's Cubs and Blossoms records          |
+| GET    | `/attendance/buds`                              | Today's Buds records                       |
 
-### Time Windows for Late Detection
+### Activities
 
-Configure in `AttendanceService.java`:
+| Method | Endpoint                        | Description                |
+|--------|---------------------------------|----------------------------|
+| POST   | `/activities/addActivity`       | Create an activity         |
+| GET    | `/activities/allActivities`     | List all activities        |
+| DELETE | `/activities/delete/{id}`       | Delete an activity         |
+| POST   | `/activities/completed/{id}`    | Mark activity as completed |
+| GET    | `/activities/totalActivity`     | Total activity count       |
+| GET    | `/activities/upComingActivity`  | Upcoming activity count    |
+| GET    | `/activities/completedActivity` | Completed activity count   |
 
-```java
-// Scouts and Guides: 12:10 PM
-// Cubs and Blossoms: 12:10 PM
-// Buds: 11:40 AM
-```
+### Taxes
 
----
+| Method | Endpoint                       | Description                                    |
+|--------|--------------------------------|------------------------------------------------|
+| GET    | `/taxes/totalRevenue`          | All-time total collected                       |
+| GET    | `/taxes/currentMonthTotal`     | Current month total                            |
+| GET    | `/taxes/dailyTotal`            | Daily breakdown                                |
+| GET    | `/taxes/monthlyTotal`          | Monthly breakdown with month names             |
+| GET    | `/taxes/totalTransactions`     | Total number of days with transactions         |
+| GET    | `/taxes/today/scoutsAndGuides` | Today's late-fee records for Scouts and Guides |
+| GET    | `/taxes/today/cubsAndBlossoms` | Today's late-fee records for Cubs and Blossoms |
+| GET    | `/taxes/today/buds`            | Today's late-fee records for Buds              |
+| POST   | `/taxes/updateAmount`          | Update a tax record's amount                   |
+| GET    | `/taxes/updatedTaxMembers`     | Members whose tax was manually adjusted today  |
 
-## 📚 API Documentation
+### Admin
 
-Base URL: `http://localhost:9090`
+| Method | Endpoint                    | Description                                  |
+|--------|-----------------------------|----------------------------------------------|
+| POST   | `/login`                    | Login                                        |
+| POST   | `/logout`                   | Logout                                       |
+| POST   | `/register`                 | Register a new admin                         |
+| GET    | `/admin/profile/{username}` | Get admin profile (image returned as Base64) |
+| POST   | `/cleanup-old-data`         | Trigger manual data cleanup                  |
 
-### 👥 Member Management
+### WhatsApp
 
-#### Add New Member
-```http
-POST /members/addMember
-Content-Type: application/json
-
-{
-  "code": "251201",
-  "fullName": "Abanoub Wagim",
-  "title": "Scout Member",
-  "dateOfBirth": "01/12/2025",
-  "phone": "01111111111",
-  "address": "Cairo, Egypt",
-  "category": "Scouts and Guides"
-}
-```
-
-**Field Validations:**
-- `code`: Exactly 6 digits (YYMMDD format)
-- `phone`: 11 digits starting with "01"
-- `category`: "Scouts and Guides" | "Cubs and Blossoms" | "Buds"
-- `title`: "Scout Leader" | "Scout Assistant" | "Scout Member"
-
-#### Get All Members
-```http
-GET /members/allMembers
-```
-
-#### Get Member by Code
-```http
-GET /members/member/{code}
-```
-
-#### Update Member
-```http
-PUT /members/update/{code}
-Content-Type: application/json
-
-{
-  "fullName": "Abanoub Wagim",
-  "title": "Scout Leader",
-  "dateOfBirth": "01/12/2025",
-  "phone": "01111111111",
-  "address": "New Address",
-  "category": "Scouts and Guides"
-}
-```
-
-#### Delete Member
-```http
-DELETE /members/delete/{code}
-```
-
-#### Get Member Count
-```http
-GET /members/getCountAllMember
-```
-
-#### Backup Database
-```http
-GET /members/backup
-```
+| Method | Endpoint                     | Description                          |
+|--------|------------------------------|--------------------------------------|
+| POST   | `/whatsapp/send/{code}`      | Send a message to a specific member  |
+| POST   | `/whatsapp/send-all`         | Send messages to all pending members |
+| GET    | `/whatsapp/pending`          | List members with unsent messages    |
+| GET    | `/whatsapp/pending/count`    | Count of pending messages            |
+| PUT    | `/whatsapp/reset/{code}`     | Reset sent status for a member       |
+| GET    | `/whatsapp/totalMessageSent` | Total messages sent                  |
 
 ---
 
-### ✅ Attendance Management
+## Notes
 
-#### Record Attendance (QR Scan)
-```http
-POST /attendance/attend
-Content-Type: application/json
+**Authentication** — Session-based, not token-based. CSRF protection is disabled. This is intentional for an intranet deployment where the frontend and backend run on the same network.
 
-{
-  "code": "251201",
-  "category": "Scouts and Guides"
-}
-```
+**WhatsApp automation** — Requires Chrome and ChromeDriver. The driver path is hardcoded for Windows. On first use, you will need to scan the WhatsApp Web QR code; the session is reused across calls as long as the driver stays active.
 
-**Response:**
-```json
-{
-  "id": 123,
-  "memberCode": "251201",
-  "category": "Scouts and Guides",
-  "checkInTime": "12:15:30 PM",
-  "dateOfDay": "2025-11-01",
-  "status": "Present",
-  "amount": -1
-}
-```
-
-#### Get Today's Attendance
-```http
-GET /attendance/allAttendancePerToday
-```
-
-#### Get Present Count
-```http
-GET /attendance/presentToday
-```
-
-#### Get Absent Count
-```http
-GET /attendance/absentToday
-```
-
-#### Get Late Members Today
-```http
-GET /attendance/lateToday
-```
-
-#### Get Category Attendance
-```http
-GET /attendance/scouts-and-guides
-GET /attendance/cubs-and-blossoms
-GET /attendance/buds
-```
+**Database** — SQLite runs in WAL mode with `busy_timeout=5000`. The database file is `scout-system.db` in the project root. Timestamped backups go to `backups/`.
 
 ---
 
-### 💰 Tax Management
+## Project
 
-#### Get Daily Totals
-```http
-GET /taxes/dailyTotal
-```
-
-**Response:**
-```json
-[
-  {
-    "date": "01-11-2025",
-    "totalAmount": 150.0,
-    "day": "Friday"
-  }
-]
-```
-
-#### Get Monthly Totals
-```http
-GET /taxes/monthlyTotal
-```
-
-#### Get Total Revenue
-```http
-GET /taxes/totalRevenue
-```
-
-#### Update Tax Amount
-```http
-POST /taxes/updateAmount
-Content-Type: application/json
-
-{
-  "taxId": 15,
-  "amount": 10
-}
-```
-
-#### Get Category Taxes
-```http
-GET /taxes/today/scoutsAndGuides
-GET /taxes/today/cubsAndBlossoms
-GET /taxes/today/buds
-```
-
----
-
-### 🎯 Activity Management
-
-#### Add Activity
-```http
-POST /activities/addActivity
-Content-Type: application/json
-
-{
-  "name": "Annual Camp 2025",
-  "date": "25-12-2025",
-  "location": "Sinai Desert",
-  "description": "Week-long camping trip",
-  "status": "upcoming"
-}
-```
-
-#### Get All Activities
-```http
-GET /activities/allActivities
-```
-
-#### Delete Activity
-```http
-DELETE /activities/delete/{id}
-```
-
-#### Mark as Completed
-```http
-POST /activities/completed/{id}
-```
-
-#### Get Statistics
-```http
-GET /activities/totalActivity
-GET /activities/upComingActivity
-GET /activities/completedActivity
-```
-
----
-
-### 📱 WhatsApp Integration
-
-#### Send Message to Member
-```http
-POST /whatsapp/send/{code}
-```
-
-#### Send to All Pending
-```http
-POST /whatsapp/send-all
-```
-
-#### Get Pending Members
-```http
-GET /whatsapp/pending
-```
-
-#### Get Pending Count
-```http
-GET /whatsapp/pending/count
-```
-
-#### Reset Sent Status
-```http
-PUT /whatsapp/reset/{code}
-```
-
-#### Get Total Sent
-```http
-GET /whatsapp/totalMessageSent
-```
-
----
-
-## ⚠️ Error Handling
-
-### HTTP Status Codes
-
-| Code | Meaning | Usage |
-|------|---------|-------|
-| 200 | OK | Successful request |
-| 204 | No Content | Successful but no data |
-| 400 | Bad Request | Invalid input |
-| 401 | Unauthorized | Authentication failed |
-| 404 | Not Found | Resource doesn't exist |
-| 500 | Internal Server Error | Server error |
-
-### Common Error Responses
-
-**Member Not Found**
-```json
-{
-  "error": "The Member doesn't exist."
-}
-```
-
-**Duplicate Attendance**
-```json
-{
-  "error": "Member has already attended today for category: Scouts and Guides"
-}
-```
-
-**Duplicate Member Code**
-```json
-{
-  "error": "The code already exists"
-}
-```
-
----
-
-## 📸 UI & UX
-
- ![register](https://github.com/user-attachments/assets/cf386a53-5c28-4551-a477-2e9e63e9181a)
-<img width="1366" height="599" alt="signIn" src="https://github.com/user-attachments/assets/8cf7c161-6023-4e6b-9a6c-52356cdfe291" />
-<img width="1366" height="599" alt="dashboard" src="https://github.com/user-attachments/assets/42a6050b-fe09-4a3c-bb7c-50baa260935f" />
-<img width="1366" height="599" alt="Members" src="https://github.com/user-attachments/assets/100aa535-2f36-4ed6-b0e2-37eefb9033f8" />
-<img width="1366" height="599" alt="Edit - Members" src="https://github.com/user-attachments/assets/6db9ca42-da65-4b10-b07e-8550b053b0fd" />
-<img width="1366" height="599" alt="Delete - Members" src="https://github.com/user-attachments/assets/8bc573a1-cbe3-48a2-bf83-d1be9ff27276" />
-<img width="1366" height="599" alt="Attend - Members" src="https://github.com/user-attachments/assets/62bfafc5-e777-447e-964e-f1a1a00cbee1" />
-<img width="1366" height="599" alt="profile Members - Members" src="https://github.com/user-attachments/assets/1e32a94d-1569-4ff8-ad33-1b0fbd46a047" />
-<img width="1366" height="599" alt="Attendance" src="https://github.com/user-attachments/assets/0d30405b-bd40-4804-a115-322ec1570be6" />
-<img width="1366" height="660" alt="taxes" src="https://github.com/user-attachments/assets/ca3e6434-5f56-467a-b400-897b356889fb" />
-<img width="1366" height="1098" alt="Activities" src="https://github.com/user-attachments/assets/4901dd1b-8cea-4d25-af2e-0fa58152a6d0" />
-<img width="1366" height="720" alt="QR Attendance" src="https://github.com/user-attachments/assets/c8e8f509-6136-444b-9c2a-e9d50f8a7ca3" />
-<img width="1366" height="944" alt="Whatsapp" src="https://github.com/user-attachments/assets/8378e34a-3a40-4a35-90a9-0b1384091e31" />
-
----
-
-## 🔄 Version History & Roadmap
-
-### Current Version (v1.0)
-This README documents the stable release version currently available in the repository.
-
-### Upcoming Version (v2.0) - In Development
-We're actively working on an improved backend with:
-- 🔧 Enhanced code architecture and organization
-- ⚡ Performance optimizations
-- 🛡️ Improved security features
-- 🐛 Bug fixes and stability improvements
-- 📊 Additional reporting capabilities
-- 📝 Improved JavaScript codebase
-
-**Note:** The new version maintains backward compatibility with existing data and configurations. Migration guides will be provided upon release.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 💬 Support
-
-For issues, questions, or feature requests:
-
-- 📧 Email: abanoubwagim@gmail.com
-- 🐛 Issues: [GitHub Issues](https://github.com/abanoubwagim/scout-management-system/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/abanoubwagim/scout-management-system/discussions)
-
----
-
-## 🙏 Acknowledgments
-
-- Built with ❤️ for **Mar-Mina Scouts** in Egypt
-  
----
-
-## 🌟 Star History
-
-If this project helped you, please consider giving it a ⭐!
-
----
-
-<div align="center">
-
-### 🎯 This project is open source and available for any scout organization to use and customize.
-
-**Made with ❤️ for Scout Organizations Worldwide**
-
-[⬆ Back to Top](#-scout-management-system)
-
-</div>
+Built as a volunteer project for the scout group at Mar Mena Church.
+Backend: Abanoub Wagim - Frontend: Ramy Ayman
